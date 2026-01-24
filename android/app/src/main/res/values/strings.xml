@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Supr Mushrooms</string>
+    <string name="title_activity_main">Supr Mushrooms</string>
+    <string name="package_name">com.suprmushrooms.app</string>
+    <string name="custom_url_scheme">com.suprmushrooms.app</string>
+</resources>
