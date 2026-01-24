@@ -1,7 +1,3 @@
-// ===================================
-// FILE 2: components/pages/ProductDetailPage.tsx (FIXED)
-// ===================================
-
 'use client'
 
 import React, { useContext, useEffect, useState } from 'react';

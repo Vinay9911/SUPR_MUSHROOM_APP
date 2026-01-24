@@ -9,6 +9,7 @@ import { WishlistProvider } from '@/components/providers/WishlistProvider'
 import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { Chatbot } from '@/components/ui/Chatbot'
+import { OrganizationSchema } from '@/components/shared/SEO';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
@@ -50,6 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
       <body className="font-sans bg-brand-light text-brand-text">
+        <OrganizationSchema />
         <AuthProvider>
           <DataProvider>
             <WishlistProvider>

@@ -238,6 +238,61 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
           </div>
         </div>
       </section>
+
+      <section className="py-16 bg-brand-cream/30">
+  <div className="max-w-4xl mx-auto px-4">
+    <h2 className="text-3xl font-serif font-bold text-center mb-12">Common Questions</h2>
+    <div className="space-y-4">
+      {[
+        { q: "Where do you deliver in Delhi NCR?", a: "We deliver fresh mushrooms to Delhi, Noida, Gurugram, Faridabad, Ghaziabad, and Meerut within 24 hours." },
+        { q: "Is Supr Mushroom 100% Organic?", a: "Yes. Our mushrooms are lab-grown in sterile environments using aeroponics and modern farming, ensuring zero pesticides or heavy metals." },
+        { q: "Do you sell Saffron?", a: "We are currently developing our Aeroponic Saffron facility. It will be available for pre-order soon." }
+      ].map((faq, i) => (
+        <details key={i} className="bg-white p-6 rounded-xl border border-brand-cream cursor-pointer group">
+          <summary className="font-bold text-lg flex justify-between items-center list-none">
+            {faq.q}
+            <span className="group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <p className="mt-4 text-brand-muted">{faq.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
   );
 };

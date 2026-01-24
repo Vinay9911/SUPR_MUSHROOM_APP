@@ -2,8 +2,10 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProductDetailPage } from '@/components/pages/ProductDetailPage'
+import { ProductSchema } from '@/components/shared/SEO';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
-export const revalidate = 1800 // 30 minutes
+export const revalidate = 1800 
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const supabase = await createClient()
@@ -31,7 +33,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 }
 
 export async function generateStaticParams() {
-  const supabase = await createClient()
+
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  
   const { data: products } = await supabase
     .from('products')
     .select('id')
@@ -54,5 +61,21 @@ export default async function ProductPage({ params }: { params: { id: string } }
     notFound()
   }
 
-  return <ProductDetailPage product={product} />
+  const seoData = {
+    name: product.name,
+    description: product.description,
+    images: product.images,
+    price: product.price,
+    currency: 'INR',
+    stock: product.stock,
+    rating: product.rating || 5,
+    reviews: product.reviews_count || 120
+  };
+
+  return (
+    <>
+      <ProductSchema product={seoData} /> {/* Inject Schema */}
+      <ProductDetailPage product={product} />
+    </>
+  )
 }

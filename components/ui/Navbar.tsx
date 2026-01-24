@@ -1,7 +1,3 @@
-// ===================================
-// FILE 4: components/ui/Navbar.tsx (FIXED)
-// ===================================
-
 'use client';
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -12,10 +8,15 @@ import { ShoppingBag, Menu, X, User, LayoutDashboard, Heart, Home, Store, LogOut
 import { CartContext } from '@/components/providers/CartProvider';
 import { AuthContext } from '@/components/providers/AuthProvider';
 import { AuthModal } from './AuthModal';
+import { CheckoutModal } from './CheckoutModal';
+import { CartSidebar } from './CartSidebar'; // ✅ Import the new Sidebar
 
 export const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  
+  // ✅ New State for Checkout Modal
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   
   const cartContext = useContext(CartContext);
   const { user, isAdmin, signOut } = useContext(AuthContext)!;
@@ -31,7 +32,14 @@ export const Navbar: React.FC = () => {
   }, [isMenuOpen]);
 
   const handleCartClick = () => {
+    // ✅ Opens the Sidebar (Not checkout)
     cartContext?.setIsCartOpen(true);
+  };
+
+  const handleProceedToCheckout = () => {
+    // ✅ Logic to switch from Sidebar to Modal
+    cartContext?.setIsCartOpen(false);
+    setIsCheckoutOpen(true);
   };
 
   const scrollToSection = (sectionId: string) => {
@@ -134,7 +142,7 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Drawer */}
+        {/* Mobile Drawer (Navigation) */}
         <div 
           className={`fixed inset-0 z-[60] bg-black/50 transition-opacity duration-300 md:hidden ${
             isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -212,6 +220,19 @@ export const Navbar: React.FC = () => {
       </nav>
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      
+      {/* ✅ STEP 1: CART SIDEBAR (Opens when bag clicked) */}
+      <CartSidebar 
+        isOpen={cartContext?.isCartOpen || false} 
+        onClose={() => cartContext?.setIsCartOpen(false)} 
+        onCheckout={handleProceedToCheckout}
+      />
+      
+      {/* ✅ STEP 2: CHECKOUT MODAL (Opens when 'Proceed' clicked) */}
+      <CheckoutModal 
+        isOpen={isCheckoutOpen} 
+        onClose={() => setIsCheckoutOpen(false)} 
+      />
     </>
   );
 };
