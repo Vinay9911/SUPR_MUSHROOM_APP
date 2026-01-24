@@ -3,16 +3,20 @@
 import React, { useState, useContext } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ChefHat, Sparkles, ShoppingCart, Loader2 } from 'lucide-react';
-import { CartContext } from '@/context/CartContext';
+
+import { CartContext } from '@/components/providers/CartProvider';
 import toast from 'react-hot-toast';
 
 export default function AIChefPage() {
-  const { cart } = useContext(CartContext)!;
+  
+  const cartContext = useContext(CartContext);
+  const cart = cartContext?.cart || [];
+  
   const [recipe, setRecipe] = useState('');
   const [loading, setLoading] = useState(false);
   
   const generateRecipe = async () => {
-    // IMPORTANT: Ensure you have NEXT_PUBLIC_GEMINI_API_KEY in your .env.local
+    
     const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     
     if (!API_KEY) return toast.error("API Key missing");

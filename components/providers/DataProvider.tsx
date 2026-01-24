@@ -2,7 +2,8 @@
 
 import React, { createContext, useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Product, Category, FarmingMethod } from '../types';
+// FIXED: Changed '../types' to '@/types'
+import { Product, Category, FarmingMethod } from '@/types';
 
 interface DataContextType {
   products: Product[];

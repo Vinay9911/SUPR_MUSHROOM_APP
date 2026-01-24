@@ -3,15 +3,19 @@
 import React, { useContext } from 'react';
 import Link from 'next/link';
 import { Heart, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
-import { WishlistContext } from '@/context/WishlistContext';
-import { DataContext } from '@/context/DataContext';
-import { CartContext } from '@/context/CartContext';
+import { WishlistContext } from '@/components/providers/WishlistProvider';
+import { DataContext } from '@/components/providers/DataProvider';
+import { CartContext } from '@/components/providers/CartProvider';
 import toast from 'react-hot-toast';
 
 export default function WishlistPage() {
-  const { wishlist, removeFromWishlist } = useContext(WishlistContext)!;
-  const { products } = useContext(DataContext)!;
+  const wishlistCtx = useContext(WishlistContext);
+  const dataCtx = useContext(DataContext);
   const cartCtx = useContext(CartContext);
+
+  const wishlist = wishlistCtx?.wishlist || [];
+  const removeFromWishlist = wishlistCtx?.removeFromWishlist || (async () => {});
+  const products = dataCtx?.products || [];
 
   const wishlistProducts = products.filter(p => wishlist.includes(p.id));
 

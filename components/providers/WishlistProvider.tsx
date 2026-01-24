@@ -2,8 +2,10 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { AuthContext } from './AuthContext';
-import { Product } from '../types';
+// FIXED: Changed './AuthContext' to './AuthProvider'
+import { AuthContext } from './AuthProvider';
+// FIXED: Changed '../types' to '@/types'
+import { Product } from '@/types';
 import toast from 'react-hot-toast';
 
 interface WishlistContextType {

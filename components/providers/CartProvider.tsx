@@ -1,9 +1,11 @@
 'use client';
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { Product, CartItem } from '../types';
+// FIXED: Changed '../types' to '@/types'
+import { Product, CartItem } from '@/types';
 import { createClient } from '@/lib/supabase/client';
-import { AuthContext } from './AuthContext';
+// FIXED: Changed './AuthContext' to './AuthProvider'
+import { AuthContext } from './AuthProvider';
 import toast from 'react-hot-toast';
 
 interface CartContextType {
@@ -27,6 +29,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  // FIXED: Ensure AuthContext is imported from AuthProvider
   const { user } = useContext(AuthContext)!;
 
   // 1. INITIAL LOAD
