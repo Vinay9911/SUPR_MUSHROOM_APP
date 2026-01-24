@@ -1,4 +1,5 @@
 'use client';
+
 import React, { useState } from 'react';
 import { MessageSquare, Leaf, X, ArrowRight, Phone, Plus } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -12,7 +13,7 @@ export const Chatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY; 
+  const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // ✅ FIXED
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -59,7 +60,6 @@ export const Chatbot: React.FC = () => {
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4">
       
-      {/* 2-Option Menu Popup */}
       {showOptions && !isOpen && (
         <div className="bg-white rounded-2xl shadow-xl border border-brand-cream overflow-hidden mb-2 animate-in slide-in-from-bottom-2 fade-in duration-200">
           <button onClick={openAIChat} className="flex items-center gap-3 w-full px-6 py-4 hover:bg-brand-light transition-colors border-b border-brand-cream text-left">
@@ -84,7 +84,6 @@ export const Chatbot: React.FC = () => {
         </div>
       )}
 
-      {/* Main AI Chat Window */}
       {isOpen && (
         <div className="bg-white w-80 sm:w-96 h-[500px] rounded-3xl shadow-2xl flex flex-col border border-brand-cream animate-in slide-in-from-bottom-5">
            <div className="p-4 bg-brand-brown rounded-t-3xl text-white flex justify-between items-center">
@@ -111,7 +110,6 @@ export const Chatbot: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Action Button */}
       <button 
         onClick={handleMainClick} 
         className={`p-4 rounded-full shadow-2xl transition-all hover:scale-110 ${isOpen || showOptions ? 'bg-brand-dark rotate-45' : 'bg-brand-brown'} text-white`}

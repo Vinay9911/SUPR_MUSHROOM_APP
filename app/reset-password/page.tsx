@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
+import { createClient } from '@/lib/supabase/client'; // ✅ FIXED
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 
@@ -15,14 +15,13 @@ export default function ResetPasswordPage() {
     if (!password) return toast.error("Please enter a password");
     setLoading(true);
     
-    // This updates the password for the currently logged-in user
     const { error } = await supabase.auth.updateUser({ password });
     
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("Password updated successfully!");
-      router.push('/'); // Redirect to home/dashboard
+      router.push('/');
     }
     setLoading(false);
   };

@@ -8,8 +8,8 @@ import {
   MapPin, CreditCard, Trash2 
 } from 'lucide-react';
 import { BarChart, Bar, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
-import { createClient } from '@/utils/supabase/client'; // Use your Next.js Supabase client
-import { DataContext } from '@/context/DataContext';
+import { createClient } from '@/lib/supabase/client'; // ✅ FIXED
+import { DataContext } from '@/components/providers/DataProvider'; // ✅ FIXED
 import { Product, ProductStatus } from '@/types';
 import toast from 'react-hot-toast';
 

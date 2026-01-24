@@ -1,10 +1,13 @@
+// ===================================
+// FILE 6: components/ui/AuthModal.tsx (FIXED)
+// ===================================
+
 'use client';
 
 import React, { useState, useContext } from 'react';
-import { X, Loader2, Mail } from 'lucide-react';
-import { AuthContext } from '../context/AuthContext';
+import { X, Loader2 } from 'lucide-react';
+import { AuthContext } from '@/components/providers/AuthProvider';
 import toast from 'react-hot-toast';
-import { createClient } from '@/lib/supabase/client';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -12,7 +15,6 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
-  const supabase = createClient(); // ✅ Added
   const [view, setView] = useState<'login' | 'signup' | 'forgot'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

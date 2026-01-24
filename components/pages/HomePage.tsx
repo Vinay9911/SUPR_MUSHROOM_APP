@@ -1,14 +1,14 @@
 'use client'
 
 import React, { useContext, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ArrowRight, Cpu, ShieldCheck, Leaf, Plus, Minus, Loader2, Truck, Sparkles, DollarSign, Phone, Mail, Heart } from 'lucide-react';
-import { CartContext } from '../context/CartContext';
-import { DataContext } from '../context/DataContext';
-import { WishlistContext } from '../context/WishlistContext';
-import { SEO } from '../components/SEO';
-import { motion } from 'framer-motion'; 
-import heroGif from '../assets/hero-animation.gif'; 
+import { CartContext } from '@/components/providers/CartProvider';
+import { DataContext } from '@/components/providers/DataProvider';
+import { WishlistContext } from '@/components/providers/WishlistProvider';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -25,49 +25,33 @@ const staggerContainer = {
   }
 };
 
-export const Home: React.FC = () => {
+interface HomePageProps {
+  initialProducts: any[];
+}
+
+export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
   const cartContext = useContext(CartContext);
   const dataContext = useContext(DataContext);
   const wishlistContext = useContext(WishlistContext);
-  const { products, loading } = dataContext!;
-  const location = useLocation();
+  const pathname = usePathname();
+
+  // Use initialProducts from server or fall back to context
+  const products = initialProducts.length > 0 ? initialProducts : (dataContext?.products || []);
+  const loading = dataContext?.loading || false;
 
   useEffect(() => {
-    if (location.hash) {
-      const element = document.querySelector(location.hash);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [location, loading]);
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-brand-brown"><Loader2 className="animate-spin" size={48} /></div>;
+  if (loading && initialProducts.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-brand-brown">
+        <Loader2 className="animate-spin" size={48} />
+      </div>
+    );
+  }
 
-  const visibleProducts = products.filter(p => !p.is_deleted && p.status !== 'hidden');
-
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "Supr Mushrooms",
-    "url": window.location.origin,
-    "logo": "https://suprmushrooms.com/logo.png",
-    "description": "Scientifically farmed premium mushrooms in Delhi NCR. 100% Natural, Chemical-free, and delivered fresh.",
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+91-8826986127",
-      "contactType": "Customer Service",
-      "areaServed": "IN",
-      "availableLanguage": "en"
-    },
-    "sameAs": [
-      "https://instagram.com/suprmushrooms",
-      "https://facebook.com/suprmushrooms"
-    ]
-  };
+  const visibleProducts = products.filter((p: any) => !p.is_deleted && p.status !== 'hidden');
 
   const handleWishlistToggle = (e: React.MouseEvent, productId: string) => {
     e.preventDefault();
@@ -81,12 +65,6 @@ export const Home: React.FC = () => {
 
   return (
     <div className="pb-0 bg-brand-light w-full overflow-x-hidden">
-      <SEO 
-        title="Fresh Lab-Grown Mushrooms Delhi" 
-        description="Buy fresh Oyster and Shiitake mushrooms in Delhi NCR. Grown in sterile environments, chemical-free, and delivered farm-to-table in 24 hours."
-        schema={organizationSchema}
-      />
-
       {/* Hero Section */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-brand-light via-brand-cream to-brand-darkCream pt-20">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-32 pb-20 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
@@ -130,11 +108,14 @@ export const Home: React.FC = () => {
             className="relative z-10 order-2 md:order-2 mt-8 md:mt-0 flex justify-center"
           >
              <div className="absolute inset-0 bg-brand-cream/40 blur-[60px] md:blur-[90px] rounded-full transform translate-x-4 md:translate-x-10"></div>
-             <img 
-  src={heroGif} 
-  alt="Fresh Mushrooms Animation" 
-  className="relative w-[80%] md:w-[115%] h-auto max-w-[300px] md:max-w-none mx-auto md:mx-0 object-contain md:scale-125 md:translate-x-10"
-/>
+             <Image 
+               src="/hero-animation.gif" 
+               alt="Fresh Mushrooms Animation" 
+               width={400}
+               height={400}
+               className="relative w-[80%] md:w-[115%] h-auto max-w-[300px] md:max-w-none mx-auto md:mx-0 object-contain md:scale-125 md:translate-x-10"
+               priority
+             />
           </motion.div>
         </div>
       </section>
@@ -180,7 +161,7 @@ export const Home: React.FC = () => {
           </motion.div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer} className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
-            {visibleProducts.map(product => {
+            {visibleProducts.map((product: any) => {
               const isOutOfStock = product.stock === 0;
               const isComingSoon = product.status === 'coming_soon';
               const cartItem = cartContext?.cart.find(item => item.productId === product.id);
@@ -189,9 +170,9 @@ export const Home: React.FC = () => {
 
               return (
               <motion.div variants={fadeInUp} key={product.id} className="group bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-brand-cream flex flex-col h-full relative">
-                <Link to={`/product/${product.id}`} className="block relative aspect-square overflow-hidden cursor-pointer">
+                <Link href={`/product/${product.id}`} className="block relative aspect-square overflow-hidden cursor-pointer">
                   {isOutOfStock && !isComingSoon && <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center"><span className="bg-brand-text text-white px-3 py-1 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm">Out of Stock</span></div>}
-                  <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <Image src={product.images[0]} alt={product.name} width={400} height={400} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   <div className="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col gap-2 z-10">
                      {isComingSoon && (
                        <div className="bg-slate-800 text-white text-[8px] md:text-[10px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-full uppercase tracking-wider w-fit shadow-md border border-white/20">Coming Soon</div>
@@ -203,7 +184,7 @@ export const Home: React.FC = () => {
                 </Link>
 
                 <div className="p-3 md:p-6 flex flex-col flex-grow">
-                  <Link to={`/product/${product.id}`}>
+                  <Link href={`/product/${product.id}`}>
                     <h4 className="text-sm md:text-lg font-bold text-brand-text mb-1 md:mb-2 group-hover:text-brand-brown transition-colors line-clamp-2 leading-tight">{product.name}</h4>
                   </Link>
                   <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-brand-muted mb-2 md:mb-4">
@@ -250,7 +231,6 @@ export const Home: React.FC = () => {
             </a>
             <a href="mailto:vinayaggarwal271@gmail.com" className="flex items-center gap-3 md:gap-4 group no-underline transition-transform hover:scale-105 duration-300 max-w-[90vw]">
               <Mail className="w-6 h-6 md:w-10 md:h-10 text-black group-hover:text-[#8b4513] transition-colors duration-300 shrink-0" strokeWidth={2.5} />
-              {/* FIXED: Text Size upgraded to text-sm on mobile (not text-[10px]) and removed break-all unless strictly needed */}
               <span className="font-sans font-bold text-sm sm:text-lg md:text-4xl text-black group-hover:text-[#8b4513] transition-colors duration-300 uppercase text-left">
                 VINAYAGGARWAL271@GMAIL.COM
               </span>

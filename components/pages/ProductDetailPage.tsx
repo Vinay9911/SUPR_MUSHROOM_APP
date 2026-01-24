@@ -1,29 +1,32 @@
-'use client'
-import React, { useContext, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, ShoppingBag, Star, Truck, ShieldCheck, Leaf, Heart } from 'lucide-react';
-import { DataContext } from '../context/DataContext';
-import { CartContext } from '../context/CartContext';
-import { WishlistContext } from '../context/WishlistContext';
-import { SEO } from '../components/SEO';
-import { motion, AnimatePresence } from 'framer-motion';
+// ===================================
+// FILE 2: components/pages/ProductDetailPage.tsx (FIXED)
+// ===================================
 
-export const ProductDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const dataContext = useContext(DataContext);
+'use client'
+
+import React, { useContext, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Star, Truck, ShieldCheck, Leaf, Heart } from 'lucide-react';
+import { DataContext } from '@/components/providers/DataProvider';
+import { CartContext } from '@/components/providers/CartProvider';
+import { WishlistContext } from '@/components/providers/WishlistProvider';
+import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+
+interface ProductDetailPageProps {
+  product: any;
+}
+
+export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product }) => {
   const cartContext = useContext(CartContext);
   const wishlistContext = useContext(WishlistContext);
-  const { products, loading } = dataContext!;
   
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
-  
-  // Sticky Bar Logic
   const [showStickyBar, setShowStickyBar] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show sticky bar when scrolled down 400px (past the hero image/main button usually)
       if (window.scrollY > 400) {
         setShowStickyBar(true);
       } else {
@@ -34,14 +37,6 @@ export const ProductDetail: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-brand-brown">Loading...</div>;
-
-  const product = products.find(p => p.id === id);
-
-  if (!product) {
-    return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
-  }
 
   const isOutOfStock = product.stock === 0;
   const isComingSoon = product.status === 'coming_soon';
@@ -61,34 +56,10 @@ export const ProductDetail: React.FC = () => {
     }
   };
 
-  const productSchema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "image": product.images,
-    "description": product.description,
-    "brand": {
-      "@type": "Brand",
-      "name": "Supr Mushrooms"
-    },
-    "offers": {
-      "@type": "Offer",
-      "priceCurrency": "INR",
-      "price": product.price,
-      "availability": isOutOfStock ? "https://schema.org/OutOfStock" : "https://schema.org/InStock"
-    }
-  };
-
   return (
     <div className="pt-24 pb-12 bg-white min-h-screen">
-      <SEO 
-        title={`${product.name} - Buy Fresh Organic Mushrooms`}
-        description={product.description}
-        schema={productSchema}
-      />
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="inline-flex items-center gap-2 text-brand-brown font-medium mb-8 hover:underline">
+        <Link href="/" className="inline-flex items-center gap-2 text-brand-brown font-medium mb-8 hover:underline">
           <ArrowLeft size={20} /> Back to Shop
         </Link>
 
@@ -101,13 +72,14 @@ export const ProductDetail: React.FC = () => {
                   <span className="bg-brand-text text-white px-6 py-3 rounded-full font-bold text-lg shadow-xl">Out of Stock</span>
                 </div>
               )}
-              <img 
+              <Image 
                 src={product.images[activeImage]} 
                 alt={product.name} 
+                width={600}
+                height={600}
                 className="w-full h-full object-cover"
               />
               
-              {/* Desktop Wishlist Button on Image */}
               <button 
                 onClick={handleWishlistToggle}
                 className="absolute top-4 right-4 p-3 bg-white/90 hover:bg-white rounded-full shadow-md text-brand-brown transition-transform hover:scale-110 hidden md:block"
@@ -118,13 +90,13 @@ export const ProductDetail: React.FC = () => {
 
             {product.images.length > 1 && (
               <div className="flex gap-4 overflow-x-auto pb-2">
-                {product.images.map((img, idx) => (
+                {product.images.map((img: string, idx: number) => (
                   <button 
                     key={idx}
                     onClick={() => setActiveImage(idx)}
                     className={`relative w-24 h-24 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${activeImage === idx ? 'border-brand-brown ring-2 ring-brand-brown/20' : 'border-transparent hover:border-brand-cream'}`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <Image src={img} alt="" width={96} height={96} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -155,7 +127,6 @@ export const ProductDetail: React.FC = () => {
               {product.description}
             </p>
 
-            {/* Main Add to Cart Section (Desktop) */}
             <div className="space-y-6 mb-8">
                {!isComingSoon && (
                 <div className="flex items-center gap-6">
@@ -194,7 +165,6 @@ export const ProductDetail: React.FC = () => {
                   {isComingSoon ? "Notify Me" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </button>
                 
-                {/* Mobile/Tablet Wishlist Toggle Button (Inline) */}
                 <button 
                   onClick={handleWishlistToggle}
                   className="w-16 h-16 rounded-full border border-brand-cream flex items-center justify-center text-brand-brown hover:bg-brand-light transition-colors md:hidden"
@@ -204,7 +174,6 @@ export const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Feature Highlights */}
             <div className="grid grid-cols-2 gap-4">
                <div className="flex items-center gap-3 p-4 bg-brand-light rounded-2xl border border-brand-cream/50">
                  <Truck className="text-brand-brown" size={24} />
@@ -232,7 +201,7 @@ export const ProductDetail: React.FC = () => {
         </div>
       </div>
 
-      {/* --- FLOATING STICKY BAR (Mobile Only) --- */}
+      {/* Floating Sticky Bar (Mobile) */}
       <AnimatePresence>
         {showStickyBar && !isComingSoon && !isOutOfStock && (
           <motion.div 

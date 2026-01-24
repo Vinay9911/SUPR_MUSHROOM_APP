@@ -1,11 +1,16 @@
+
+// ===================================
+// FILE 7: components/ui/CheckoutModal.tsx (FIXED - CRITICAL)
+// ===================================
+
 'use client';
 
 import React, { useContext, useState, useEffect } from 'react';
 import { X, ArrowRight, Loader2, CreditCard, Banknote, Tag, Upload, Copy, Check } from 'lucide-react';
-import { CartContext } from '../context/CartContext';
+import { CartContext } from '@/components/providers/CartProvider';
 import { createClient } from '@/lib/supabase/client';
 import toast from 'react-hot-toast';
-import { Coupon } from '../types';
+import { Coupon } from '@/types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -17,13 +22,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const cartContext = useContext(CartContext);
   const [loading, setLoading] = useState(false);
 
-  // Form Data
   const [formData, setFormData] = useState({ name: '', address: '', phone: '', email: '' });
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
   const [paymentFile, setPaymentFile] = useState<File | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Coupon State
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
@@ -31,17 +34,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   useEffect(() => {
     if (isOpen) {
-      // 1. Fetch user data (if logged in) for auto-fill
       const fetchUser = async () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
            setFormData(prev => ({ ...prev, email: user.email || '' }));
-           // You can fetch profile here if needed
         }
       };
       fetchUser();
 
-      // 2. Fetch Active Coupons
       const fetchCoupons = async () => {
         const { data } = await supabase
           .from('coupons')
@@ -51,11 +51,10 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       };
       fetchCoupons();
     }
-  }, [isOpen]);
+  }, [isOpen, supabase]);
 
   if (!isOpen || !cartContext) return null;
 
-  // --- HELPER FUNCTIONS ---
   const copyToClipboard = () => {
     navigator.clipboard.writeText("8826986127@kotak");
     setCopied(true);
@@ -96,13 +95,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     if (!couponCode) return;
     setLoading(true);
     
-    // Check local list first
     const coupon = availableCoupons.find(c => c.code === couponCode.toUpperCase());
     
     if (coupon) {
       applyCouponLogic(coupon);
     } else {
-      // Fallback: Check DB if not in list (hidden coupons)
       const { data } = await supabase.from('coupons').select('*').eq('code', couponCode.toUpperCase()).single();
       if (data && data.is_active) {
          applyCouponLogic(data);
@@ -125,19 +122,16 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     setLoading(true);
 
     try {
-      // 1. Stock Validation
       const isStockValid = await cartContext.validateStock();
       if (!isStockValid) {
         setLoading(false);
         return;
       }
 
-      // 2. Determine User (Guest vs Logged In)
       const { data: { user } } = await supabase.auth.getUser();
       const userId = user?.id || null;
       const finalAmount = cartContext.total - discount;
 
-      // 3. Upload Screenshot (if UPI)
       let paymentProofUrl = null;
       if (paymentMethod === 'UPI' && paymentFile) {
         const fileName = `${Date.now()}_${paymentFile.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
@@ -154,12 +148,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
         paymentProofUrl = publicUrlData.publicUrl;
       }
 
-      // 4. Create Order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
           user_id: userId,
-          guest_email: !userId ? formData.email : null, // Store email for guests
+          guest_email: !userId ? formData.email : null,
           total_amount: finalAmount,
           status: 'Pending',
           shipping_address: `${formData.name}, ${formData.address}, Ph: ${formData.phone}, Email: ${formData.email}`,
@@ -173,7 +166,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
       if (orderError) throw orderError;
 
-      // 5. Create Order Items
       for (const item of cartContext.cart) {
         await supabase.from('order_items').insert({
           order_id: orderData.id,
@@ -183,7 +175,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
           product_name_snapshot: item.product.name
         });
 
-        // Deduct Stock (ONLY if NOT Pre-Order)
         if (!item.isPreOrder) {
           const { error: stockError } = await supabase.rpc('decrement_stock', { 
             row_id: item.productId, 
@@ -191,14 +182,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
           });
           
           if (stockError) {
-             // Fallback
              const newStock = item.product.stock - item.quantity;
              await supabase.from('products').update({ stock: newStock }).eq('id', item.productId);
           }
         }
       }
       
-      // 6. Update Coupon Usage
       if (appliedCoupon) {
         await supabase.rpc('increment_coupon_usage', { coupon_code: appliedCoupon });
       }
@@ -207,7 +196,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
       cartContext.clearCart();
       onClose();
       
-      // Reset State
       setDiscount(0);
       setAppliedCoupon(null);
       setFormData({ name: '', address: '', phone: '', email: '' });
@@ -225,7 +213,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-dark/50 backdrop-blur-sm animate-in fade-in">
       <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         
-        {/* Header */}
         <div className="p-4 border-b border-brand-cream flex justify-between items-center bg-brand-light">
           <h2 className="font-bold text-lg text-brand-text">Checkout</h2>
           <button onClick={onClose} className="p-2 hover:bg-brand-cream rounded-full"><X size={20}/></button>
@@ -233,13 +220,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
         <div className="flex-1 overflow-y-auto p-6 grid md:grid-cols-2 gap-8">
           
-          {/* Left Column: Order Summary */}
           <div>
             <h3 className="font-bold text-brand-muted text-xs uppercase tracking-wider mb-4">Order Summary</h3>
             <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
               {cartContext.cart.map(item => (
                 <div key={item.productId} className="flex gap-3 bg-brand-light p-2 rounded-xl border border-brand-cream">
-                  <img src={item.product.images[0]} className="w-16 h-16 rounded-lg object-cover bg-white" />
+                  <img src={item.product.images[0]} className="w-16 h-16 rounded-lg object-cover bg-white" alt={item.product.name} />
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <p className="font-bold text-sm text-brand-text line-clamp-1">{item.product.name}</p>
@@ -254,7 +240,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
               ))}
             </div>
             
-            {/* Coupon Section */}
             <div className="mt-6 pt-4 border-t border-brand-cream">
               <label className="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2 block">Apply Coupon</label>
               <div className="flex gap-2 mb-2">
@@ -275,7 +260,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                 )}
               </div>
 
-              {/* Available Coupons Pills */}
               {availableCoupons.length > 0 && !appliedCoupon && (
                 <div className="flex flex-wrap gap-2">
                   {availableCoupons.map(c => (
@@ -299,7 +283,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
             </div>
           </div>
 
-          {/* Right Column: Form */}
           <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between">
                <h3 className="font-bold text-brand-muted text-xs uppercase tracking-wider">Shipping Details</h3>
@@ -323,7 +306,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
                </button>
             </div>
 
-            {/* UPI Payment Instructions */}
             {paymentMethod === 'UPI' && (
                <div className="bg-brand-light border border-brand-cream rounded-xl p-4 animate-in slide-in-from-top-2">
                   <p className="text-xs text-brand-muted uppercase font-bold mb-2">1. Send Payment To:</p>
@@ -353,7 +335,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
           </form>
         </div>
 
-        {/* Footer */}
         <div className="p-4 border-t border-brand-cream bg-brand-light">
           <button form="checkout-form" disabled={loading} className="w-full bg-brand-brown text-white py-4 rounded-xl font-bold hover:bg-brand-dark transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-brown/20">
             {loading ? <Loader2 className="animate-spin"/> : (
