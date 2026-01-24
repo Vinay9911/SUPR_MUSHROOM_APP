@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { HomePage } from '@/components/pages/HomePage'
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Product } from '@/types'
 
 export const metadata: Metadata = {
@@ -29,10 +29,16 @@ export const metadata: Metadata = {
   }
 }
 
-export const revalidate = 3600
+// ✅ This makes the page STATIC (pre-rendered at build time)
+export const revalidate = 3600 // Revalidate every hour
 
 async function getProducts(): Promise<Product[]> {
-  const supabase = await createClient()
+  // ✅ Use direct Supabase client (NO cookies, NO dynamic APIs)
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+  
   const { data } = await supabase
     .from('products')
     .select('*')

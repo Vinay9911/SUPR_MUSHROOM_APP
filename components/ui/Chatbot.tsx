@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { MessageSquare, Leaf, X, ArrowRight, Phone, Plus } from 'lucide-react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import toast from 'react-hot-toast';
 
 export const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,27 +14,65 @@ export const Chatbot: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY; // ✅ FIXED
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    
     const userMsg = input.trim();
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsTyping(true);
+
+    const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    
     if (!API_KEY) {
-       setIsTyping(false);
-       return;
+      console.error('Gemini API Key is missing');
+      setMessages(prev => [...prev, { 
+        role: 'bot', 
+        text: "Sorry, the AI assistant is not configured. Please contact support." 
+      }]);
+      setIsTyping(false);
+      toast.error("AI configuration missing");
+      return;
     }
 
     try {
       const genAI = new GoogleGenerativeAI(API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = `You are the Supr Mushrooms assistant. Products: Mushrooms (Oyster, Shiitake, Lion's Mane) & Saffron. Delivery: Delhi NCR (2 hours). Payment: UPI. User: ${userMsg}. Keep it short.`;
+      
+      const prompt = `You are the Supr Mushrooms assistant for a premium organic mushroom farm in Delhi NCR. 
+
+Our Products:
+- Oyster Mushrooms (Fresh, organic, ₹200/kg)
+- Button Mushrooms (White mushrooms, ₹180/kg)
+- Cremini Mushrooms (Baby bella, ₹220/kg)
+- King Oyster Mushrooms (Premium, ₹250/kg)
+
+We deliver across Delhi, Noida, Gurugram, Ghaziabad within 24-48 hours.
+Payment: Cash on Delivery or UPI
+Contact: +91-8826986127
+
+User question: ${userMsg}
+
+Provide a helpful, friendly response in 2-3 sentences. Focus on our products and services.`;
+
       const result = await model.generateContent(prompt);
-      setMessages(prev => [...prev, { role: 'bot', text: result.response.text() }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'bot', text: "Network error. Please try again." }]);
+      const response = await result.response;
+      const text = response.text();
+      
+      setMessages(prev => [...prev, { role: 'bot', text }]);
+    } catch (error: any) {
+      console.error('Chatbot error:', error);
+      let errorMessage = "I'm having trouble connecting. Please try again or contact us directly.";
+      
+      if (error.message?.includes('API_KEY_INVALID')) {
+        errorMessage = "Service temporarily unavailable. Please call +91-8826986127 for assistance.";
+      } else if (error.message?.includes('RATE_LIMIT')) {
+        errorMessage = "Too many requests. Please wait a moment and try again.";
+      }
+      
+      setMessages(prev => [...prev, { role: 'bot', text: errorMessage }]);
+      toast.error("Connection issue");
     } finally {
       setIsTyping(false);
     }
@@ -93,18 +132,44 @@ export const Chatbot: React.FC = () => {
              </div>
              <button onClick={() => setIsOpen(false)}><X size={18} /></button>
            </div>
+           
            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-brand-light">
              {messages.map((m, i) => (
                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-2xl text-sm max-w-[85%] ${m.role === 'user' ? 'bg-brand-brown text-white rounded-tr-none' : 'bg-white border border-brand-cream text-brand-text rounded-tl-none'}`}>{m.text}</div>
+                  <div className={`p-3 rounded-2xl text-sm max-w-[85%] ${m.role === 'user' ? 'bg-brand-brown text-white rounded-tr-none' : 'bg-white border border-brand-cream text-brand-text rounded-tl-none'}`}>
+                    {m.text}
+                  </div>
                </div>
              ))}
-             {isTyping && <div className="text-xs text-brand-muted px-2">Typing...</div>}
+             {isTyping && (
+               <div className="flex justify-start">
+                 <div className="bg-white border border-brand-cream p-3 rounded-2xl rounded-tl-none">
+                   <div className="flex gap-1">
+                     <span className="w-2 h-2 bg-brand-brown/40 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
+                     <span className="w-2 h-2 bg-brand-brown/40 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
+                     <span className="w-2 h-2 bg-brand-brown/40 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                   </div>
+                 </div>
+               </div>
+             )}
            </div>
+           
            <div className="p-3 border-t border-brand-cream bg-white">
              <form onSubmit={(e) => {e.preventDefault(); handleSend()}} className="flex gap-2">
-               <input value={input} onChange={e=>setInput(e.target.value)} className="flex-1 bg-brand-light rounded-full px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-brown" placeholder="Ask about mushrooms..." />
-               <button type="submit" className="bg-brand-brown text-white p-2 rounded-full hover:bg-brand-dark"><ArrowRight size={18}/></button>
+               <input 
+                 value={input} 
+                 onChange={e=>setInput(e.target.value)} 
+                 className="flex-1 bg-brand-light rounded-full px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-brown" 
+                 placeholder="Ask about mushrooms..." 
+                 disabled={isTyping}
+               />
+               <button 
+                 type="submit" 
+                 disabled={isTyping || !input.trim()}
+                 className="bg-brand-brown text-white p-2 rounded-full hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+               >
+                 <ArrowRight size={18}/>
+               </button>
              </form>
            </div>
         </div>

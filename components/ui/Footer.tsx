@@ -38,18 +38,16 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         
         <div className="col-span-1 flex flex-col items-center md:items-start">
-    
-
-<div className="mb-6">
-  <Image 
-  src="/logo.svg" 
-  alt="Supr Mushrooms - Premium Organic Mushroom Farm Delhi NCR" 
-  width={120}
-  height={120}
-  className="h-[100px] md:h-[120px] w-auto object-contain brightness-0 invert opacity-90"
-  priority
-/>
-</div>
+          <div className="mb-6">
+            <Image 
+              src="/logo.svg" 
+              alt="Supr Mushrooms - Premium Organic Mushroom Farm Delhi NCR" 
+              width={120}
+              height={120}
+              className="h-[100px] md:h-[120px] w-auto object-contain brightness-0 invert opacity-90"
+              priority
+            />
+          </div>
           <p className="text-sm leading-relaxed text-brand-cream/80 max-w-xs mx-auto md:mx-0">Delivering the freshest, scientifically farmed mushrooms in Delhi NCR. Grown in sterile, chemical-free environments for pure taste and nutrition.</p>
         </div>
 

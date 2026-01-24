@@ -11,8 +11,17 @@ import { Footer } from '@/components/ui/Footer'
 import { Chatbot } from '@/components/ui/Chatbot'
 import { OrganizationSchema, LocalBusinessSchema, FAQSchema } from '@/components/shared/SEO'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
+const inter = Inter({ 
+  subsets: ['latin'], 
+  variable: '--font-inter',
+  display: 'swap',
+})
+
+const playfair = Playfair_Display({ 
+  subsets: ['latin'], 
+  variable: '--font-playfair',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Fresh Mushrooms in Delhi NCR | Premium Organic Mushroom Farm | Buy Oyster & Button Mushrooms',
@@ -77,14 +86,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <meta name="geo.region" content="IN-DL" />
         <meta name="geo.placename" content="Delhi NCR" />
         <meta name="geo.position" content="28.6139;77.2090" />
         <meta name="ICBM" content="28.6139, 77.2090" />
       </head>
-      <body className="font-sans bg-brand-light text-brand-text">
+      <body className="font-sans bg-brand-light text-brand-text" suppressHydrationWarning>
         <OrganizationSchema />
         <LocalBusinessSchema />
         <FAQSchema />
