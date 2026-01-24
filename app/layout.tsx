@@ -9,26 +9,40 @@ import { WishlistProvider } from '@/components/providers/WishlistProvider'
 import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { Chatbot } from '@/components/ui/Chatbot'
-import { OrganizationSchema } from '@/components/shared/SEO';
+import { OrganizationSchema, LocalBusinessSchema, FAQSchema } from '@/components/shared/SEO'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
 
 export const metadata: Metadata = {
-  title: 'Supr Mushrooms | Premium Organic Fungi',
-  description: 'Buy fresh Oyster and Shiitake mushrooms in Delhi NCR. Grown in sterile environments, chemical-free, and delivered farm-to-table in 24 hours.',
-  keywords: ['mushrooms', 'organic', 'Delhi NCR', 'fresh produce', 'oyster mushrooms', 'shiitake'],
-  authors: [{ name: 'Supr Mushrooms' }],
+  title: 'Fresh Mushrooms in Delhi NCR | Premium Organic Mushroom Farm | Buy Oyster & Button Mushrooms',
+  description: 'Buy fresh organic mushrooms in Delhi NCR - Oyster, Button, Cremini & King Oyster mushrooms. Climate-controlled vertical farming. Farm-to-door delivery in Delhi, Noida, Gurugram, Ghaziabad. Wholesale & retail.',
+  keywords: [
+    'mushrooms in Delhi',
+    'buy mushrooms Delhi NCR',
+    'fresh oyster mushrooms Delhi',
+    'button mushrooms Noida',
+    'organic mushrooms Gurugram',
+    'mushroom supplier Delhi',
+    'wholesale mushrooms NCR',
+    'vertical farm mushrooms',
+    'aeroponic mushrooms Delhi',
+    'fresh mushrooms Ghaziabad',
+    'premium mushrooms Delhi',
+    'mushroom delivery NCR'
+  ],
+  authors: [{ name: 'Supr Mushrooms Delhi' }],
   openGraph: {
-    title: 'Supr Mushrooms | Premium Organic Fungi',
-    description: 'Fresh lab-grown mushrooms delivered to your door in Delhi NCR',
+    title: 'Fresh Organic Mushrooms Delhi NCR | Climate-Controlled Vertical Farm',
+    description: 'Premium oyster, button, cremini & king oyster mushrooms grown in Delhi. Farm-fresh delivery across NCR. Wholesale & restaurant supply available.',
     url: 'https://supr-mushroom.vercel.app',
-    siteName: 'Supr Mushrooms',
+    siteName: 'Supr Mushrooms - Premium Mushroom Farm Delhi NCR',
     images: [
       {
         url: 'https://images.unsplash.com/photo-1595503426955-d6c561491714',
         width: 1200,
         height: 630,
+        alt: 'Fresh organic mushrooms grown in vertical farm in Delhi NCR'
       },
     ],
     locale: 'en_IN',
@@ -36,11 +50,25 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Supr Mushrooms | Premium Organic Fungi',
-    description: 'Fresh lab-grown mushrooms delivered to your door',
+    title: 'Fresh Mushrooms Delhi NCR | Organic Vertical Farm',
+    description: 'Buy premium oyster & button mushrooms in Delhi. Farm-to-door delivery across NCR.',
     images: ['https://images.unsplash.com/photo-1595503426955-d6c561491714'],
   },
   metadataBase: new URL('https://supr-mushroom.vercel.app'),
+  alternates: {
+    canonical: 'https://supr-mushroom.vercel.app',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({
@@ -50,8 +78,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <head>
+        <meta name="geo.region" content="IN-DL" />
+        <meta name="geo.placename" content="Delhi NCR" />
+        <meta name="geo.position" content="28.6139;77.2090" />
+        <meta name="ICBM" content="28.6139, 77.2090" />
+      </head>
       <body className="font-sans bg-brand-light text-brand-text">
         <OrganizationSchema />
+        <LocalBusinessSchema />
+        <FAQSchema />
         <AuthProvider>
           <DataProvider>
             <WishlistProvider>

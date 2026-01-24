@@ -177,28 +177,71 @@ export default function AdminPage() {
       img.onerror = reject;
     });
   };
+// ✅ AUTO-DELETE IMAGE FROM SUPABASE STORAGE
+const deleteImageFromStorage = async (imageUrl: string) => {
+  try {
+    // Extract filename from URL
+    // URL format: https://xxx.supabase.co/storage/v1/object/public/products/filename.jpg
+    const urlParts = imageUrl.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+    
+    const { error } = await supabase.storage
+      .from('products')
+      .remove([fileName]);
+    
+    if (error) {
+      console.error('Failed to delete image from storage:', error);
+    } else {
+      console.log('✓ Image deleted from storage:', fileName);
+    }
+  } catch (error) {
+    console.error('Error deleting image:', error);
+  }
+};
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setUploading(true);
-      if (!e.target.files || e.target.files.length === 0) return;
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  try {
+    setUploading(true);
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const newImages: string[] = [];
+    for (let i = 0; i < e.target.files.length; i++) {
+      const file = e.target.files[i];
+      const compressedBlob = await compressImage(file);
       
-      const newImages: string[] = [];
-      for (let i = 0; i < e.target.files.length; i++) {
-        const file = e.target.files[i];
-        const compressedBlob = await compressImage(file);
-        const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
-        const filePath = `prod_${Date.now()}_${Math.random().toString(36).substring(7)}.jpg`;
-        const { error } = await supabase.storage.from('products').upload(filePath, compressedFile);
-        if (error) throw error;
-        const { data } = supabase.storage.from('products').getPublicUrl(filePath);
-        newImages.push(data.publicUrl);
-      }
-      setProductForm(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
-      toast.success(`${newImages.length} images optimized & uploaded`);
-    } catch (error: any) { toast.error("Upload failed: " + error.message); } 
-    finally { setUploading(false); }
-  };
+      // ✅ SEO-FRIENDLY FILENAME GENERATION
+      const productSlug = productForm.name 
+        ? productForm.name.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+        : 'mushroom';
+      
+      const timestamp = Date.now();
+      const seoFileName = `${productSlug}-delhi-ncr-${timestamp}.jpg`;
+      
+      const compressedFile = new File([compressedBlob], seoFileName, { type: 'image/jpeg' });
+      
+      const { error } = await supabase.storage
+        .from('products')
+        .upload(seoFileName, compressedFile);
+        
+      if (error) throw error;
+      
+      const { data } = supabase.storage
+        .from('products')
+        .getPublicUrl(seoFileName);
+        
+      newImages.push(data.publicUrl);
+    }
+    
+    setProductForm(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
+    toast.success(`${newImages.length} images optimized & uploaded with SEO-friendly names`);
+  } catch (error: any) { 
+    toast.error("Upload failed: " + error.message); 
+  } finally { 
+    setUploading(false); 
+  }
+};
 
   const startEdit = (p: Product) => {
     setEditingProduct(p);
@@ -242,10 +285,33 @@ export default function AdminPage() {
   };
 
   const handleSoftDelete = async (id: string) => {
-    if (!confirm("Delete this product? It will remain in past orders.")) return;
-    const { error } = await supabase.from('products').update({ is_deleted: true, status: 'hidden' }).eq('id', id);
-    if (error) toast.error("Failed"); else { toast.success("Deleted"); refreshProducts(); }
-  };
+  if (!confirm("Delete this product? Images will be permanently deleted from storage.")) return;
+  
+  try {
+    // Find the product
+    const product = products.find(p => p.id === id);
+    
+    if (product && product.images.length > 0) {
+      // Delete all images from storage
+      for (const imageUrl of product.images) {
+        await deleteImageFromStorage(imageUrl);
+      }
+    }
+    
+    // Soft delete from database
+    const { error } = await supabase
+      .from('products')
+      .update({ is_deleted: true, status: 'hidden' })
+      .eq('id', id);
+    
+    if (error) throw error;
+    
+    toast.success("Product and images deleted");
+    refreshProducts();
+  } catch (error: any) {
+    toast.error("Failed: " + error.message);
+  }
+};
 
   const filteredOrders = orders.filter(o => {
     const matchesSearch = o.id.includes(orderSearch) || o.shipping_address?.toLowerCase().includes(orderSearch.toLowerCase());
@@ -462,7 +528,23 @@ export default function AdminPage() {
                      {productForm.images.map((img, i) => (
                        <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border border-brand-cream">
                          <img src={img} className="w-full h-full object-cover" alt="Product" />
-                         <button type="button" onClick={()=>setProductForm(prev=>({...prev, images: prev.images.filter((_,idx)=>idx!==i)}))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"><X size={12}/></button>
+                        <button 
+  type="button" 
+  onClick={async () => {
+    const imageToDelete = productForm.images[i];
+    // Delete from storage
+    await deleteImageFromStorage(imageToDelete);
+    // Remove from form state
+    setProductForm(prev => ({
+      ...prev, 
+      images: prev.images.filter((_, idx) => idx !== i)
+    }));
+    toast.success('Image deleted from storage');
+  }} 
+  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+>
+  <X size={12}/>
+</button>
                        </div>
                      ))}
                      <label className="border-2 border-dashed border-brand-cream rounded-lg flex items-center justify-center cursor-pointer hover:bg-brand-light aspect-square transition-colors">

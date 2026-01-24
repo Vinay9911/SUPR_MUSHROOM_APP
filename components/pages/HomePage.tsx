@@ -35,7 +35,6 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
   const wishlistContext = useContext(WishlistContext);
   const pathname = usePathname();
 
-  // Use initialProducts from server or fall back to context
   const products = initialProducts.length > 0 ? initialProducts : (dataContext?.products || []);
   const loading = dataContext?.loading || false;
 
@@ -65,7 +64,7 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
 
   return (
     <div className="pb-0 bg-brand-light w-full overflow-x-hidden">
-      {/* Hero Section */}
+      {/* Hero Section with SEO-Optimized Content */}
       <section className="relative min-h-[85vh] md:min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-brand-light via-brand-cream to-brand-darkCream pt-20">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 md:pt-32 pb-20 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           
@@ -78,27 +77,27 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-brown opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-brown"></span>
               </span>
-              <span className="text-xs font-bold text-brand-brown uppercase tracking-widest">Premium Fresh Harvest</span>
+              <span className="text-xs font-bold text-brand-brown uppercase tracking-widest">Fresh Mushrooms Delhi NCR</span>
             </motion.div>
             
             <motion.h1 variants={fadeInUp} className="text-4xl md:text-7xl font-serif font-bold text-brand-text leading-[1.1]">
-              Pure Nutrition. <br />
-              <span className="text-brand-brown italic">Untouched by Toxins.</span>
+              Fresh Organic Mushrooms <br />
+              <span className="text-brand-brown italic">Delivered Across Delhi NCR</span>
             </motion.h1>
             
             <motion.p variants={fadeInUp} className="text-base md:text-lg text-brand-muted max-w-lg leading-relaxed mx-auto md:mx-0">
-              Forget store-bought. Eat mushrooms as nature intended—grown in sterile environments without heavy metals or chemicals.
+              Premium oyster, button, cremini & king oyster mushrooms grown in climate-controlled vertical farms. Farm-fresh delivery to Delhi, Noida, Gurugram, Ghaziabad within 24 hours. 100% organic, zero pesticides.
             </motion.p>
             
             <motion.div variants={fadeInUp} className="flex flex-wrap justify-center md:justify-start gap-4">
               <button onClick={() => document.getElementById('shop')?.scrollIntoView({behavior: 'smooth'})} className="bg-brand-brown text-white px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-brand-dark hover:shadow-lg hover:shadow-brand-brown/30 transition-all flex items-center gap-2 group">
-                Shop Fresh <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+                Order Fresh Mushrooms <ArrowRight className="group-hover:translate-x-1 transition-transform" />
               </button>
             </motion.div>
             
             <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-4 md:gap-8 pt-8 border-t border-brand-brown/10">
-              <div><div className="text-2xl md:text-3xl font-serif font-bold text-brand-text">100%</div><div className="text-[10px] md:text-xs text-brand-muted uppercase tracking-wider font-bold">Natural</div></div>
-              <div><div className="text-2xl md:text-3xl font-serif font-bold text-brand-text">0%</div><div className="text-[10px] md:text-xs text-brand-muted uppercase tracking-wider font-bold">Soil Use</div></div>
+              <div><div className="text-2xl md:text-3xl font-serif font-bold text-brand-text">100%</div><div className="text-[10px] md:text-xs text-brand-muted uppercase tracking-wider font-bold">Organic</div></div>
+              <div><div className="text-2xl md:text-3xl font-serif font-bold text-brand-text">24hr</div><div className="text-[10px] md:text-xs text-brand-muted uppercase tracking-wider font-bold">Delivery NCR</div></div>
               <div><div className="text-2xl md:text-3xl font-serif font-bold text-brand-text">0%</div><div className="text-[10px] md:text-xs text-brand-muted uppercase tracking-wider font-bold">Pesticides</div></div>
             </motion.div>
           </motion.div>
@@ -110,7 +109,7 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
              <div className="absolute inset-0 bg-brand-cream/40 blur-[60px] md:blur-[90px] rounded-full transform translate-x-4 md:translate-x-10"></div>
              <Image 
                src="/hero-animation.gif" 
-               alt="Fresh Mushrooms Animation" 
+               alt="Fresh organic mushrooms from vertical farm in Delhi NCR" 
                width={400}
                height={400}
                className="relative w-[80%] md:w-[115%] h-auto max-w-[300px] md:max-w-none mx-auto md:mx-0 object-contain md:scale-125 md:translate-x-10"
@@ -120,25 +119,25 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - SEO Enhanced */}
       <section id="labs" className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="text-center mb-12 md:mb-16">
-            <h2 className="text-xs md:text-sm font-bold text-brand-brown uppercase tracking-widest mb-3">Our Process</h2>
-            <h3 className="text-3xl md:text-5xl font-serif font-bold text-brand-text mb-6">Farming for the Future</h3>
+            <h2 className="text-xs md:text-sm font-bold text-brand-brown uppercase tracking-widest mb-3">Climate-Controlled Vertical Farming</h2>
+            <h3 className="text-3xl md:text-5xl font-serif font-bold text-brand-text mb-6">Modern Aeroponic Mushroom Farming in Delhi</h3>
             <p className="text-brand-muted max-w-2xl mx-auto text-sm md:text-base">
-              Our mushrooms are grown in clean-room environments using sterilized high-grade substrates. No pesticides. No heavy metals.
+              Our premium mushrooms are grown in sterile, climate-controlled vertical farms using advanced aeroponic technology. No soil, no pesticides, no heavy metals - just pure, organic nutrition delivered across Delhi NCR.
             </p>
           </motion.div>
 
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             {[
-              { icon: Cpu, title: "Precision Monitoring", desc: "IoT sensors monitor temperature and humidity 24/7." },
-              { icon: ShieldCheck, title: "Zero Contamination", desc: "HEPA-filtered air and strict entry protocols." },
-              { icon: Truck, title: "Fast Delivery", desc: "Fresh mushrooms delivered within 24-48 hours." },
-              { icon: Sparkles, title: "Premium Quality", desc: "Hand-picked, farm-fresh mushrooms." },
-              { icon: Leaf, title: "100% Natural", desc: "Grown naturally without harmful chemicals." },
-              { icon: DollarSign, title: "Best Prices", desc: "Competitive pricing with regular discounts." }
+              { icon: Cpu, title: "Climate-Controlled Vertical Farm", desc: "Advanced IoT sensors monitor temperature and humidity 24/7 ensuring optimal growing conditions for premium organic mushrooms." },
+              { icon: ShieldCheck, title: "Zero Contamination Guarantee", desc: "HEPA-filtered air systems and strict sterile protocols ensure chemical-free, pesticide-free mushrooms grown in Delhi." },
+              { icon: Truck, title: "Fast Delivery Delhi NCR", desc: "Farm-fresh mushrooms delivered within 24-48 hours to Delhi, Noida, Gurugram, Ghaziabad and Faridabad." },
+              { icon: Sparkles, title: "Premium Quality Organic", desc: "Hand-picked premium oyster, button, cremini and king oyster mushrooms grown using modern farming techniques." },
+              { icon: Leaf, title: "100% Natural Aeroponic", desc: "Grown using aeroponic vertical farming - no soil contamination, no heavy metals, completely organic and natural." },
+              { icon: DollarSign, title: "Best Price for Bulk Orders", desc: "Competitive wholesale pricing for restaurants, hotels and bulk buyers across Delhi NCR region." }
             ].map((feature, idx) => (
               <motion.div key={idx} variants={fadeInUp} className="p-6 md:p-8 bg-brand-light rounded-3xl border border-brand-cream hover:bg-brand-cream hover:shadow-xl transition-all duration-300 group cursor-default">
                 <div className="w-12 h-12 md:w-14 md:h-14 bg-brand-brown rounded-2xl flex items-center justify-center text-white mb-4 md:mb-6 group-hover:scale-110 transition-transform"><feature.icon size={24} className="md:w-[28px] md:h-[28px]" /></div>
@@ -150,13 +149,14 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
         </div>
       </section>
 
-      {/* Shop Section */}
+      {/* Shop Section - SEO Optimized Product Listings */}
       <section id="shop" className="pt-16 md:pt-24 pb-24 bg-brand-light">
         <div className="max-w-7xl mx-auto px-4">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp} className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-4">
             <div>
-              <h2 className="text-xs md:text-sm font-bold text-brand-green uppercase tracking-widest mb-2">Fresh Harvest</h2>
-              <h3 className="text-3xl md:text-5xl font-serif font-bold text-brand-text">Our Products</h3>
+              <h2 className="text-xs md:text-sm font-bold text-brand-green uppercase tracking-widest mb-2">Buy Fresh Mushrooms Delhi NCR</h2>
+              <h3 className="text-3xl md:text-5xl font-serif font-bold text-brand-text">Premium Organic Mushrooms</h3>
+              <p className="text-brand-muted mt-2">Oyster, Button, Cremini & King Oyster Mushrooms - Delivered Across Delhi, Noida, Gurugram, Ghaziabad</p>
             </div>
           </motion.div>
 
@@ -172,13 +172,19 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
               <motion.div variants={fadeInUp} key={product.id} className="group bg-white rounded-2xl md:rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-brand-cream flex flex-col h-full relative">
                 <Link href={`/product/${product.id}`} className="block relative aspect-square overflow-hidden cursor-pointer">
                   {isOutOfStock && !isComingSoon && <div className="absolute inset-0 bg-white/60 z-10 flex items-center justify-center"><span className="bg-brand-text text-white px-3 py-1 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm">Out of Stock</span></div>}
-                  <Image src={product.images[0]} alt={product.name} width={400} height={400} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <Image 
+                    src={product.images[0]} 
+                    alt={`Fresh ${product.name} - Premium organic mushrooms grown in vertical farm Delhi NCR`}
+                    width={400} 
+                    height={400} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                  />
                   <div className="absolute top-2 left-2 md:top-4 md:left-4 flex flex-col gap-2 z-10">
                      {isComingSoon && (
                        <div className="bg-slate-800 text-white text-[8px] md:text-[10px] font-bold px-2 py-1 md:px-3 md:py-1.5 rounded-full uppercase tracking-wider w-fit shadow-md border border-white/20">Coming Soon</div>
                      )}
                   </div>
-                  <button onClick={(e) => handleWishlistToggle(e, product.id)} className="absolute top-2 right-2 md:top-4 md:right-4 p-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full shadow-sm z-20 text-brand-brown transition-all hover:scale-110">
+                  <button onClick={(e) => handleWishlistToggle(e, product.id)} className="absolute top-2 right-2 md:top-4 md:right-4 p-2 bg-white/80 hover:bg-white backdrop-blur-sm rounded-full shadow-sm z-20 text-brand-brown transition-all hover:scale-110" aria-label={`Add ${product.name} to wishlist`}>
                     <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
                   </button>
                 </Link>
@@ -198,12 +204,12 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
                     {!isComingSoon && (
                       quantityInCart > 0 ? (
                         <div className="flex items-center justify-between md:justify-start gap-2 bg-brand-brown text-white rounded-lg md:rounded-xl p-1 shadow-lg shadow-brand-brown/20" onClick={(e) => e.preventDefault()}>
-                           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); cartContext?.updateQuantity(product.id, quantityInCart - 1); }} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center hover:bg-white/20 rounded-md md:rounded-lg transition-colors"><Minus size={14} className="md:w-4 md:h-4"/></button>
+                           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); cartContext?.updateQuantity(product.id, quantityInCart - 1); }} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center hover:bg-white/20 rounded-md md:rounded-lg transition-colors" aria-label="Decrease quantity"><Minus size={14} className="md:w-4 md:h-4"/></button>
                            <span className="font-bold text-xs md:text-sm w-4 text-center">{quantityInCart}</span>
-                           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); cartContext?.updateQuantity(product.id, quantityInCart + 1); }} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center hover:bg-white/20 rounded-md md:rounded-lg transition-colors"><Plus size={14} className="md:w-4 md:h-4"/></button>
+                           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); cartContext?.updateQuantity(product.id, quantityInCart + 1); }} className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center hover:bg-white/20 rounded-md md:rounded-lg transition-colors" aria-label="Increase quantity"><Plus size={14} className="md:w-4 md:h-4"/></button>
                         </div>
                       ) : (
-                        <button disabled={isOutOfStock} onClick={(e) => { e.preventDefault(); if (!isOutOfStock) { cartContext?.addToCart(product, 1); }}} className={`w-full md:w-12 h-8 md:h-12 rounded-lg md:rounded-2xl flex items-center justify-center transition-all ${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-brand-brown text-white hover:bg-brand-dark hover:-translate-y-1 shadow-lg shadow-brand-brown/20'}`}>
+                        <button disabled={isOutOfStock} onClick={(e) => { e.preventDefault(); if (!isOutOfStock) { cartContext?.addToCart(product, 1); }}} className={`w-full md:w-12 h-8 md:h-12 rounded-lg md:rounded-2xl flex items-center justify-center transition-all ${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-brand-brown text-white hover:bg-brand-dark hover:-translate-y-1 shadow-lg shadow-brand-brown/20'}`} aria-label={`Add ${product.name} to cart`}>
                           <Plus size={18} className="md:w-5 md:h-5" />
                         </button>
                       )
@@ -216,14 +222,70 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
         </div>
       </section>
 
-      {/* CONTACT BANNER SECTION */}
+      {/* Areas We Deliver - Critical for Local SEO */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-4">Fresh Mushroom Delivery Across Delhi NCR</h2>
+          <p className="text-center text-brand-muted mb-12 max-w-2xl mx-auto">We deliver premium organic mushrooms to homes, restaurants, and wholesalers across the National Capital Region</p>
+          
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+            {[
+              { city: 'Delhi', desc: 'Fresh mushroom delivery across all Delhi areas' },
+              { city: 'Noida', desc: 'Same-day mushroom delivery in Noida & Greater Noida' },
+              { city: 'Gurugram', desc: 'Premium mushrooms delivered to Gurugram (Gurgaon)' },
+              { city: 'Ghaziabad', desc: 'Organic mushrooms delivered fresh in Ghaziabad' },
+              { city: 'Faridabad', desc: 'Farm-fresh mushroom delivery in Faridabad' }
+            ].map((area, idx) => (
+              <div key={idx} className="text-center p-6 bg-brand-light rounded-2xl border border-brand-cream hover:shadow-lg transition-all">
+                <h3 className="font-bold text-xl text-brand-brown mb-2">{area.city}</h3>
+                <p className="text-sm text-brand-muted">{area.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* For Restaurants & Bulk Buyers - B2B SEO */}
+      <section className="py-16 bg-brand-cream/30">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-brand-cream">
+            <h2 className="text-3xl md:text-4xl font-serif font-bold text-center mb-4">Wholesale Mushroom Supplier for Restaurants & Hotels in Delhi NCR</h2>
+            <p className="text-center text-brand-muted mb-8 max-w-3xl mx-auto">
+              Premium bulk supply of fresh organic mushrooms to restaurants, hotels, cloud kitchens, and catering services across Delhi NCR. Competitive wholesale pricing, consistent quality, and reliable daily delivery.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="text-center p-6 bg-brand-light rounded-2xl">
+                <h4 className="font-bold text-lg mb-2">Restaurant Supply</h4>
+                <p className="text-sm text-brand-muted">Daily fresh mushroom delivery for restaurants and fine dining establishments</p>
+              </div>
+              <div className="text-center p-6 bg-brand-light rounded-2xl">
+                <h4 className="font-bold text-lg mb-2">Hotel Catering</h4>
+                <p className="text-sm text-brand-muted">Bulk mushroom orders for hotels and large-scale catering services</p>
+              </div>
+              <div className="text-center p-6 bg-brand-light rounded-2xl">
+                <h4 className="font-bold text-lg mb-2">Wholesale Dealers</h4>
+                <p className="text-sm text-brand-muted">Competitive pricing for vegetable wholesalers and distributors</p>
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <a href="tel:+918826986127" className="inline-flex items-center gap-2 bg-brand-brown text-white px-8 py-4 rounded-full font-bold hover:bg-brand-dark transition-all shadow-lg">
+                <Phone size={20} /> Call for Bulk Orders: +91-8826986127
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
       <section className="py-16 md:py-20 px-4 bg-brand-light">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-center text-center min-h-[300px] md:min-h-[400px]">
           <h2 className="flex flex-col items-center font-sans font-black leading-[0.9] text-[#8b4513] uppercase mb-6 md:mb-8 tracking-normal">
             <span className="text-4xl md:text-[6.5rem]">Want to</span>
             <span className="text-5xl md:text-[8.5rem] mt-2">Connect?</span>
           </h2>
-          <p className="font-sans font-medium text-sm md:text-2xl text-[#8b4513] uppercase mb-8 md:mb-12 tracking-wide max-w-3xl">Call us, or just pop our notification up on WhatsApp or email.</p>
+          <p className="font-sans font-medium text-sm md:text-2xl text-[#8b4513] uppercase mb-8 md:mb-12 tracking-wide max-w-3xl">Order Fresh Mushrooms in Delhi | Call or WhatsApp Now</p>
           <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-24 w-full">
             <a href="tel:+918826986127" className="flex items-center gap-3 md:gap-4 group no-underline transition-transform hover:scale-105 duration-300">
               <Phone className="w-6 h-6 md:w-10 md:h-10 text-black group-hover:text-[#8b4513] transition-colors duration-300" strokeWidth={2.5} />
@@ -239,60 +301,56 @@ export const HomePage: React.FC<HomePageProps> = ({ initialProducts }) => {
         </div>
       </section>
 
+      {/* FAQ Section - Critical for AI SEO */}
       <section className="py-16 bg-brand-cream/30">
-  <div className="max-w-4xl mx-auto px-4">
-    <h2 className="text-3xl font-serif font-bold text-center mb-12">Common Questions</h2>
-    <div className="space-y-4">
-      {[
-        { q: "Where do you deliver in Delhi NCR?", a: "We deliver fresh mushrooms to Delhi, Noida, Gurugram, Faridabad, Ghaziabad, and Meerut within 24 hours." },
-        { q: "Is Supr Mushroom 100% Organic?", a: "Yes. Our mushrooms are lab-grown in sterile environments using aeroponics and modern farming, ensuring zero pesticides or heavy metals." },
-        { q: "Do you sell Saffron?", a: "We are currently developing our Aeroponic Saffron facility. It will be available for pre-order soon." }
-      ].map((faq, i) => (
-        <details key={i} className="bg-white p-6 rounded-xl border border-brand-cream cursor-pointer group">
-          <summary className="font-bold text-lg flex justify-between items-center list-none">
-            {faq.q}
-            <span className="group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <p className="mt-4 text-brand-muted">{faq.a}</p>
-        </details>
-      ))}
-    </div>
-  </div>
-</section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-serif font-bold text-center mb-12">Frequently Asked Questions About Mushrooms in Delhi NCR</h2>
+          <div className="space-y-4">
+            {[
+              { 
+                q: "Where do you deliver mushrooms in Delhi NCR?", 
+                a: "We deliver fresh organic mushrooms to Delhi, Noida, Gurugram (Gurgaon), Faridabad, Ghaziabad, and Greater Noida within 24-48 hours. Same-day delivery available for bulk orders in select areas." 
+              },
+              { 
+                q: "Are your mushrooms 100% organic and pesticide-free?", 
+                a: "Yes. Our mushrooms are grown in sterile, climate-controlled vertical farms using aeroponic technology. We use zero pesticides, zero soil (which eliminates heavy metal contamination), and maintain pharmaceutical-grade cleanliness standards." 
+              },
+              { 
+                q: "Do you supply mushrooms to restaurants and hotels in Delhi?", 
+                a: "Yes! We are a trusted wholesale mushroom supplier for restaurants, hotels, cloud kitchens, and catering services across Delhi NCR. We offer competitive bulk pricing and daily delivery. Call +91-8826986127 for wholesale rates." 
+              },
+              { 
+                q: "What farming method do you use to grow mushrooms?", 
+                a: "We use advanced climate-controlled vertical farming combined with aeroponic systems. This modern farming technique allows us to grow premium oyster, button, cremini, and king oyster mushrooms year-round with consistent quality." 
+              },
+              {
+                q: "What types of mushrooms do you sell?",
+                a: "We grow and deliver: Fresh Oyster Mushrooms, Button Mushrooms (White Mushrooms), Cremini Mushrooms (Baby Bella), and King Oyster Mushrooms. All varieties are grown organically in our Delhi farm."
+              },
+              {
+                q: "How fresh are the mushrooms when delivered?",
+                a: "Our mushrooms are harvested fresh and delivered within 24-48 hours across Delhi NCR. We maintain cold chain logistics to ensure you receive farm-fresh, premium quality mushrooms at your doorstep."
+              },
+              {
+                q: "What is the price of oyster mushrooms in Delhi?",
+                a: "Our oyster mushroom prices are competitive and vary based on quantity. For retail orders, check our product page. For wholesale/bulk pricing for restaurants, contact us at +91-8826986127."
+              },
+              {
+                q: "Do you provide mushrooms for bulk or wholesale orders?",
+                a: "Yes! We specialize in wholesale mushroom supply for restaurants, hotels, and bulk buyers. We offer special pricing for regular orders and can supply up to 50kg+ daily. Contact us for customized wholesale rates."
+              }
+            ].map((faq, i) => (
+              <details key={i} className="bg-white p-6 rounded-xl border border-brand-cream cursor-pointer group">
+                <summary className="font-bold text-lg flex justify-between items-center list-none">
+                  {faq.q}
+                  <span className="group-open:rotate-180 transition-transform">▼</span>
+                </summary>
+                <p className="mt-4 text-brand-muted leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };

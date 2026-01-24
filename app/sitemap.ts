@@ -5,7 +5,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient()
   const { data: products } = await supabase
     .from('products')
-    .select('id, updated_at')
+    .select('id, name, updated_at')
     .eq('is_deleted', false)
 
   const productUrls = (products || []).map((product) => ({
@@ -21,6 +21,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
+    },
+    {
+      url: 'https://supr-mushroom.vercel.app/button-mushrooms-delhi',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: 'https://supr-mushroom.vercel.app/oyster-mushrooms-delhi',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: 'https://supr-mushroom.vercel.app/cremini-mushrooms-delhi',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: 'https://supr-mushroom.vercel.app/king-oyster-mushrooms-delhi',
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
     },
     {
       url: 'https://supr-mushroom.vercel.app/chef',
