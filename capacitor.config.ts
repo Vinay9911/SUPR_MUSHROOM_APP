@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Supr Mushrooms',
   webDir: 'public', 
   server: {
-    url: 'https://supr-mushrooms-nextjs-seo.vercel.app', // ⚠️ MAKE SURE THIS IS YOUR EXACT LIVE URL
+    url: 'https://supr-mushroom.vercel.app/', // ⚠️ MAKE SURE THIS IS YOUR EXACT LIVE URL
     cleartext: true
   }
 };
