@@ -8,6 +8,8 @@ import { CartContext } from '@/components/providers/CartProvider';
 import { WishlistContext } from '@/components/providers/WishlistProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+// 1. Import Haptics
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 interface ProductDetailPageProps {
   product: any;
@@ -20,6 +22,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
+
+  // Helper to trigger vibration safely (won't crash on web)
+  const triggerHaptic = async () => {
+    try {
+      await Haptics.impact({ style: ImpactStyle.Medium });
+    } catch (e) {
+      // Ignore if on web/not available
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,11 +51,15 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
 
   const handleAddToCart = () => {
     if (!isOutOfStock && !isComingSoon) {
+      // 2. Trigger Haptic on Add to Cart
+      triggerHaptic();
       cartContext?.addToCart(product, quantity);
     }
   };
 
   const handleWishlistToggle = () => {
+    // 3. Trigger Haptic on Wishlist Toggle
+    triggerHaptic();
     if (isWishlisted) {
       wishlistContext?.removeFromWishlist(product.id);
     } else {
@@ -68,7 +83,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
                   <span className="bg-brand-text text-white px-6 py-3 rounded-full font-bold text-lg shadow-xl">Out of Stock</span>
                 </div>
               )}
-              {/* FIX: Increased width/height, added quality and priority for sharpness */}
+              
               <Image 
                 src={product.images[activeImage]} 
                 alt={product.name} 
@@ -110,7 +125,6 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
                ) : (
                  <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">In Stock</span>
                )}
-               {/* FIX: Removed the fake review section that was here */}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-brand-text mb-4">{product.name}</h1>

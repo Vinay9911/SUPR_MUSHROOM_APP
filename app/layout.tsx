@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { Toaster } from 'react-hot-toast'
@@ -10,6 +10,8 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { Chatbot } from '@/components/ui/Chatbot'
 import { OrganizationSchema, LocalBusinessSchema, FAQSchema } from '@/components/shared/SEO'
+// 1. Import the Capacitor Client logic
+import CapacitorClient from '@/components/providers/CapacitorClient'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -22,6 +24,15 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   display: 'swap',
 })
+
+// 2. Add Viewport export for Safe Area (Notch) handling
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover', // This extends the app under the status bar
+}
 
 export const metadata: Metadata = {
   title: 'Fresh Mushrooms in Delhi NCR | Premium Organic Mushroom Farm | Buy Oyster & Button Mushrooms',
@@ -101,11 +112,17 @@ export default function RootLayout({
           <DataProvider>
             <WishlistProvider>
               <CartProvider>
+                {/* 3. Add the Capacitor Client component here */}
+                <CapacitorClient />
+                
                 <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
                 <Navbar />
-                <main className="min-h-screen">
+                
+                {/* 4. Add padding-top/bottom using env() so content isn't hidden by the notch */}
+                <main className="min-h-screen pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
                   {children}
                 </main>
+                
                 <Footer />
                 <Chatbot />
               </CartProvider>
