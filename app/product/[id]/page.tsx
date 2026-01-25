@@ -7,12 +7,15 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export const revalidate = 1800 
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+// 1. Update the type to Promise and await params inside the function
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params // Await the params here
+  
   const supabase = await createClient()
   const { data: product } = await supabase
     .from('products')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id) // Use the awaited id
     .single()
 
   if (!product) {
@@ -41,7 +44,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       images: product.images,
     },
     alternates: {
-      canonical: `https://supr-mushroom.vercel.app/product/${params.id}`,
+      canonical: `https://supr-mushroom.vercel.app/product/${id}`,
     }
   }
 }
@@ -62,12 +65,15 @@ export async function generateStaticParams() {
   }))
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
+// 2. Update the type to Promise and await params here as well
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params // Await the params here
+
   const supabase = await createClient()
   const { data: product } = await supabase
     .from('products')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id) // Use the awaited id
     .single()
 
   if (!product) {

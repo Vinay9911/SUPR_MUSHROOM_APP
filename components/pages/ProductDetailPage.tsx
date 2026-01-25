@@ -2,7 +2,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Minus, Plus, ShoppingBag, Star, Truck, ShieldCheck, Leaf, Heart } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Truck, ShieldCheck, Leaf, Heart } from 'lucide-react';
 import { DataContext } from '@/components/providers/DataProvider';
 import { CartContext } from '@/components/providers/CartProvider';
 import { WishlistContext } from '@/components/providers/WishlistProvider';
@@ -68,11 +68,14 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
                   <span className="bg-brand-text text-white px-6 py-3 rounded-full font-bold text-lg shadow-xl">Out of Stock</span>
                 </div>
               )}
+              {/* FIX: Increased width/height, added quality and priority for sharpness */}
               <Image 
                 src={product.images[activeImage]} 
                 alt={product.name} 
-                width={600}
-                height={600}
+                width={1000}
+                height={1000}
+                quality={95}
+                priority
                 className="w-full h-full object-cover"
               />
               
@@ -107,9 +110,7 @@ export const ProductDetailPage: React.FC<ProductDetailPageProps> = ({ product })
                ) : (
                  <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">In Stock</span>
                )}
-               <div className="flex items-center text-yellow-500 gap-1 text-sm font-bold">
-                 <Star fill="currentColor" size={14} /> <span>4.9</span> <span className="text-gray-400 font-normal">(120+ reviews)</span>
-               </div>
+               {/* FIX: Removed the fake review section that was here */}
             </div>
 
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-brand-text mb-4">{product.name}</h1>
