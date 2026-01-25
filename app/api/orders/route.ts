@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       guest_email 
     } = body;
 
-    // ✅ STEP 1: SERVER-SIDE STOCK & PRICE VALIDATION
+    // 1. Validate Items & Calculate Total Server-Side
     let calculatedTotal = 0;
     const validatedItems = [];
 
@@ -28,31 +28,24 @@ export async function POST(request: Request) {
         .single();
 
       if (error || !product) {
-        return NextResponse.json(
-          { error: `Product ${item.productId} not found` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 400 });
       }
 
-      // Check stock (skip for pre-orders)
+      // Stock Check (Skip for 'coming_soon')
       if (product.status !== 'coming_soon' && product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `Insufficient stock for ${product.name}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Insufficient stock for ${product.name}` }, { status: 400 });
       }
 
-      // Use SERVER price (not client-submitted price)
       calculatedTotal += product.price * item.quantity;
 
       validatedItems.push({
         product_id: product.id,
         quantity: item.quantity,
-        price: product.price, // ✅ Server-controlled price
+        price: product.price // Crucial: Using server price
       });
     }
 
-    // ✅ STEP 2: SERVER-SIDE COUPON VALIDATION
+    // 2. Validate Coupon Server-Side
     let discount = 0;
     if (coupon_code) {
       const { data: coupon } = await supabase
@@ -63,24 +56,15 @@ export async function POST(request: Request) {
         .single();
 
       if (!coupon) {
-        return NextResponse.json(
-          { error: 'Invalid coupon code' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Invalid coupon code' }, { status: 400 });
       }
 
-      // Check minimum order value
       if (coupon.min_order_value && calculatedTotal < coupon.min_order_value) {
-        return NextResponse.json(
-          { error: `Minimum order value is ₹${coupon.min_order_value}` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `Coupon requires minimum order of ₹${coupon.min_order_value}` }, { status: 400 });
       }
 
-      // Calculate discount
       discount = Math.round((calculatedTotal * coupon.discount_percentage) / 100);
       
-      // Apply max discount cap
       if (coupon.max_discount_amount && discount > coupon.max_discount_amount) {
         discount = coupon.max_discount_amount;
       }
@@ -88,21 +72,26 @@ export async function POST(request: Request) {
 
     const finalTotal = calculatedTotal - discount;
 
-    // ✅ STEP 3: CALL DATABASE FUNCTION (ATOMIC TRANSACTION)
+    // 3. Call Database RPC (Atomic Transaction)
     const { data, error: procError } = await supabase.rpc('process_order', {
       p_user_id: user_id,
       p_guest_email: guest_email,
-      p_total_amount: finalTotal,
       p_shipping_address: shipping_address,
       p_payment_method: payment_method,
       p_payment_proof_url: payment_proof_url,
       p_coupon_code: coupon_code,
       p_discount_applied: discount,
+      p_total_amount: finalTotal,
       p_items: validatedItems,
     });
 
-    if (procError || !data[0]?.success) {
-      throw new Error(data[0]?.error_message || 'Order processing failed');
+    if (procError) {
+      console.error('RPC Error:', procError);
+      throw new Error(procError.message);
+    }
+
+    if (!data || !data[0]?.success) {
+      throw new Error(data?.[0]?.error_message || 'Order processing failed unexpectedly');
     }
 
     return NextResponse.json({
