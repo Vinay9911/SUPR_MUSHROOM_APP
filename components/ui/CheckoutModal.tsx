@@ -111,103 +111,87 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (cartContext.cart.length === 0) return;
+  e.preventDefault();
+  if (cartContext.cart.length === 0) return;
 
-    if (paymentMethod === 'UPI' && !paymentFile) {
-      toast.error("Please upload the payment screenshot");
+  if (paymentMethod === 'UPI' && !paymentFile) {
+    toast.error("Please upload the payment screenshot");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    // ✅ CLIENT-SIDE STOCK PRE-CHECK (UX only, server validates again)
+    const isStockValid = await cartContext.validateStock();
+    if (!isStockValid) {
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
 
-    try {
-      const isStockValid = await cartContext.validateStock();
-      if (!isStockValid) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id || null;
-      const finalAmount = cartContext.total - discount;
-
-      let paymentProofUrl = null;
-      if (paymentMethod === 'UPI' && paymentFile) {
-        const fileName = `${Date.now()}_${paymentFile.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
-        const { error: uploadError } = await supabase.storage
-          .from('payment_proofs')
-          .upload(fileName, paymentFile);
-        
-        if (uploadError) throw uploadError;
-        
-        const { data: publicUrlData } = supabase.storage
-          .from('payment_proofs')
-          .getPublicUrl(fileName);
-          
-        paymentProofUrl = publicUrlData.publicUrl;
-      }
-
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: userId,
-          guest_email: !userId ? formData.email : null,
-          total_amount: finalAmount,
-          status: 'Pending',
-          shipping_address: `${formData.name}, ${formData.address}, Ph: ${formData.phone}, Email: ${formData.email}`,
-          payment_method: paymentMethod === 'UPI' ? 'UPI' : 'Cash on Delivery',
-          payment_proof_url: paymentProofUrl,
-          coupon_code: appliedCoupon,
-          discount_applied: discount
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      for (const item of cartContext.cart) {
-        await supabase.from('order_items').insert({
-          order_id: orderData.id,
-          product_id: item.productId,
-          quantity: item.quantity,
-          price_at_order: item.product.price,
-          product_name_snapshot: item.product.name
-        });
-
-        if (!item.isPreOrder) {
-          const { error: stockError } = await supabase.rpc('decrement_stock', { 
-            row_id: item.productId, 
-            quantity: item.quantity 
-          });
-          
-          if (stockError) {
-             const newStock = item.product.stock - item.quantity;
-             await supabase.from('products').update({ stock: newStock }).eq('id', item.productId);
-          }
-        }
-      }
+    // ✅ UPLOAD PAYMENT PROOF (if UPI)
+    let paymentProofUrl = null;
+    if (paymentMethod === 'UPI' && paymentFile) {
+      const fileName = `${Date.now()}_${paymentFile.name.replace(/[^a-zA-Z0-9.]/g, '')}`;
+      const { error: uploadError } = await supabase.storage
+        .from('payment_proofs')
+        .upload(fileName, paymentFile);
       
-      if (appliedCoupon) {
-        await supabase.rpc('increment_coupon_usage', { coupon_code: appliedCoupon });
-      }
-
-      toast.success('Order placed successfully! Check your email.');
-      cartContext.clearCart();
-      onClose();
+      if (uploadError) throw uploadError;
       
-      setDiscount(0);
-      setAppliedCoupon(null);
-      setFormData({ name: '', address: '', phone: '', email: '' });
-      setPaymentFile(null);
-
-    } catch (error: any) {
-      console.error("Order Error:", error);
-      toast.error('Failed to place order: ' + error.message);
-    } finally {
-      setLoading(false);
+      const { data: publicUrlData } = supabase.storage
+        .from('payment_proofs')
+        .getPublicUrl(fileName);
+        
+      paymentProofUrl = publicUrlData.publicUrl;
     }
-  };
+
+    // ✅ CALL SECURE API ROUTE (NOT DIRECT DB)
+    const response = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: userId,
+        guest_email: !userId ? formData.email : null,
+        shipping_address: `${formData.name}, ${formData.address}, Ph: ${formData.phone}, Email: ${formData.email}`,
+        payment_method: paymentMethod === 'UPI' ? 'UPI' : 'Cash on Delivery',
+        payment_proof_url: paymentProofUrl,
+        coupon_code: appliedCoupon,
+        items: cartContext.cart.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          // ⚠️ DON'T send price - server validates
+        })),
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Order failed');
+    }
+
+    toast.success('Order placed! Check your email.');
+    cartContext.clearCart();
+    onClose();
+    
+    // Reset form
+    setDiscount(0);
+    setAppliedCoupon(null);
+    setFormData({ name: '', address: '', phone: '', email: '' });
+    setPaymentFile(null);
+
+  } catch (error: any) {
+    console.error("Order Error:", error);
+    toast.error(error.message || 'Failed to place order');
+  } finally {
+    setLoading(false);
+  }
+};
+        
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-brand-dark/50 backdrop-blur-sm animate-in fade-in">
