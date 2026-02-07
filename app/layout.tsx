@@ -103,6 +103,7 @@ export default function RootLayout({
         <meta name="geo.placename" content="Delhi NCR" />
         <meta name="geo.position" content="28.6139;77.2090" />
         <meta name="ICBM" content="28.6139, 77.2090" />
+        <meta name="google-site-verification" content="CCCueTxJCGAaxLU62l5QMYY2ihSB1h4WaCV5bOYzTVg" />
       </head>
       <body className="font-sans bg-brand-light text-brand-text" suppressHydrationWarning>
         <OrganizationSchema />
