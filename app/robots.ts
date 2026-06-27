@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/config'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -14,7 +15,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/'],
       },
     ],
-    sitemap: 'https://supr-mushroom.vercel.app/sitemap.xml',
-    host: 'https://supr-mushroom.vercel.app',
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   }
 }

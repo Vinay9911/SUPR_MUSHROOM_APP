@@ -27,7 +27,7 @@ export const UserOrdersPage: React.FC<UserOrdersPageProps> = ({ orders }) => {
         <h1 className="text-3xl md:text-4xl font-serif font-bold text-brand-text mb-8">Order History</h1>
         
         {orders.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl shadow-lg border border-brand-cream">
+          <div className="text-center py-20 bg-white dark:bg-brand-light rounded-3xl shadow-lg border border-brand-cream dark:border-brand-cream/20">
              <div className="w-20 h-20 bg-brand-light rounded-full flex items-center justify-center mx-auto mb-6 text-brand-brown">
                 <Package size={40} />
              </div>
@@ -42,7 +42,7 @@ export const UserOrdersPage: React.FC<UserOrdersPageProps> = ({ orders }) => {
               const step = getStatusStep(order.status);
               const isExpanded = expandedOrder === order.id;
               return (
-              <div key={order.id} className="bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all border border-brand-cream overflow-hidden">
+              <div key={order.id} className="bg-white dark:bg-brand-light rounded-3xl shadow-sm hover:shadow-xl transition-all border border-brand-cream dark:border-brand-cream/20 overflow-hidden">
                 <div className="p-6 md:p-8 cursor-pointer" onClick={() => setExpandedOrder(isExpanded ? null : order.id)}>
                   <div className="flex flex-col sm:flex-row justify-between sm:items-start mb-6 gap-4">
                     <div>
@@ -79,7 +79,7 @@ export const UserOrdersPage: React.FC<UserOrdersPageProps> = ({ orders }) => {
                     <h4 className="font-bold text-sm uppercase text-brand-muted mb-4">Items in Order</h4>
                     <div className="space-y-4">
                       {order.order_items?.map((item: any, idx: number) => (
-                        <div key={idx} className="flex gap-4 items-center bg-white p-3 rounded-xl border border-brand-cream">
+                        <div key={idx} className="flex gap-4 items-center bg-white dark:bg-bg-color p-3 rounded-xl border border-brand-cream dark:border-brand-cream/20">
                            <img src={item.products?.images?.[0]} className="w-12 h-12 rounded-lg object-cover bg-brand-light" alt="Product" />
                            <div className="flex-1">
                              <p className="font-bold text-brand-text text-sm">{item.product_name_snapshot || item.products?.name || "Product"}</p>

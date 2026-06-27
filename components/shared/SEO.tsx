@@ -1,6 +1,8 @@
 import Script from 'next/script';
+import { SITE_URL } from '@/lib/config';
 
 interface ProductSEO {
+  id: string;
   name: string;
   description: string;
   images: string[];
@@ -28,7 +30,7 @@ export function ProductSchema({ product }: { product: ProductSEO }) {
       priceCurrency: product.currency,
       price: product.price,
       availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-      url: `https://supr-mushroom.vercel.app/product/${product.name.toLowerCase().replace(/\s+/g, '-')}`,
+      url: `${SITE_URL}/product/${product.id}`,
       itemCondition: 'https://schema.org/NewCondition',
       seller: {
         '@type': 'Organization',
@@ -39,10 +41,11 @@ export function ProductSchema({ product }: { product: ProductSEO }) {
         name: 'Delhi NCR',
       },
     },
-    aggregateRating: product.rating ? {
+    // Only emit a rating when real reviews exist (avoids fake/empty AggregateRating, a Google policy risk)
+    aggregateRating: (product.rating && (product.reviews ?? 0) > 0) ? {
       '@type': 'AggregateRating',
       ratingValue: product.rating,
-      reviewCount: product.reviews || 0,
+      reviewCount: product.reviews,
       bestRating: '5',
       worstRating: '1'
     } : undefined
@@ -58,14 +61,78 @@ export function ProductSchema({ product }: { product: ProductSEO }) {
   );
 }
 
+export function BreadcrumbSchema({ items }: { items: { name: string; url: string }[] }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((it, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+  return (
+    <Script
+      id="breadcrumb-schema"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      strategy="afterInteractive"
+    />
+  );
+}
+
+export function ArticleSchema({ article }: { article: { title: string; description: string; image: string; datePublished: string; url: string } }) {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.description,
+    image: article.image,
+    datePublished: article.datePublished,
+    dateModified: article.datePublished,
+    author: { '@type': 'Organization', name: 'Supr Mushrooms' },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Supr Mushrooms',
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.svg` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': article.url },
+  };
+  return (
+    <Script
+      id="article-schema"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      strategy="afterInteractive"
+    />
+  );
+}
+
+export function FAQJsonLd({ items, id = 'faq-schema-page' }: { items: { q: string; a: string }[]; id?: string }) {
+  if (!items?.length) return null;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((it) => ({
+      '@type': 'Question',
+      name: it.q,
+      acceptedAnswer: { '@type': 'Answer', text: it.a },
+    })),
+  };
+  return (
+    <Script id={id} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} strategy="afterInteractive" />
+  );
+}
+
 export function OrganizationSchema() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Supr Mushrooms',
     alternateName: 'Supr Mushrooms Delhi NCR',
-    url: 'https://supr-mushroom.vercel.app',
-    logo: 'https://supr-mushroom.vercel.app/logo.png',
+    url: SITE_URL,
+    logo: `${SITE_URL}/logo.svg`,
     description: 'Premium organic mushroom farm in Delhi NCR using climate-controlled vertical farming and aeroponics. Fresh oyster, button, cremini and king oyster mushrooms delivered across Delhi, Noida, Gurugram, Ghaziabad.',
     founder: {
       '@type': 'Person',
@@ -104,11 +171,11 @@ export function LocalBusinessSchema() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://supr-mushroom.vercel.app',
+    '@id': SITE_URL,
     name: 'Supr Mushrooms - Premium Mushroom Farm Delhi NCR',
-    image: 'https://supr-mushroom.vercel.app/logo.png',
+    image: `${SITE_URL}/logo.svg`,
     description: 'Fresh organic mushrooms grown using climate-controlled vertical farming in Delhi. We deliver premium oyster mushrooms, button mushrooms, cremini and king oyster mushrooms across Delhi NCR including Noida, Gurugram, Ghaziabad and Faridabad.',
-    url: 'https://supr-mushroom.vercel.app',
+    url: SITE_URL,
     telephone: '+91-8826986127',
     email: 'vinayaggarwal271@gmail.com',
     priceRange: '₹₹',

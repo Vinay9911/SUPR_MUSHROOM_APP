@@ -10,8 +10,8 @@ import { Navbar } from '@/components/ui/Navbar'
 import { Footer } from '@/components/ui/Footer'
 import { Chatbot } from '@/components/ui/Chatbot'
 import { OrganizationSchema, LocalBusinessSchema, FAQSchema } from '@/components/shared/SEO'
-// 1. Import the Capacitor Client logic
-import CapacitorClient from '@/components/providers/CapacitorClient'
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
+import { SITE_URL } from '@/lib/config'
 
 const inter = Inter({ 
   subsets: ['latin'], 
@@ -25,13 +25,9 @@ const playfair = Playfair_Display({
   display: 'swap',
 })
 
-// 2. Add Viewport export for Safe Area (Notch) handling
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover', // This extends the app under the status bar
 }
 
 export const metadata: Metadata = {
@@ -55,14 +51,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Fresh Organic Mushrooms Delhi NCR | Climate-Controlled Vertical Farm',
     description: 'Premium oyster, button, cremini & king oyster mushrooms grown in Delhi. Farm-fresh delivery across NCR. Wholesale & restaurant supply available.',
-    url: 'https://supr-mushroom.vercel.app',
+    url: SITE_URL,
     siteName: 'Supr Mushrooms - Premium Mushroom Farm Delhi NCR',
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1595503426955-d6c561491714',
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Fresh organic mushrooms grown in vertical farm in Delhi NCR'
+        alt: 'Supr Mushrooms — Fresh organic mushrooms delivered across Delhi NCR'
       },
     ],
     locale: 'en_IN',
@@ -72,11 +68,11 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Fresh Mushrooms Delhi NCR | Organic Vertical Farm',
     description: 'Buy premium oyster & button mushrooms in Delhi. Farm-to-door delivery across NCR.',
-    images: ['https://images.unsplash.com/photo-1595503426955-d6c561491714'],
+    images: ['/og-image.png'],
   },
-  metadataBase: new URL('https://supr-mushroom.vercel.app'),
+  metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: 'https://supr-mushroom.vercel.app',
+    canonical: SITE_URL,
   },
   robots: {
     index: true,
@@ -109,18 +105,15 @@ export default function RootLayout({
         <OrganizationSchema />
         <LocalBusinessSchema />
         <FAQSchema />
-        <AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          <AuthProvider>
           <DataProvider>
             <WishlistProvider>
               <CartProvider>
-                {/* 3. Add the Capacitor Client component here */}
-                <CapacitorClient />
-                
                 <Toaster position="top-center" toastOptions={{ duration: 3000 }} />
                 <Navbar />
-                
-                {/* 4. Add padding-top/bottom using env() so content isn't hidden by the notch */}
-                <main className="min-h-screen pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+
+                <main className="min-h-screen">
                   {children}
                 </main>
                 
@@ -130,6 +123,7 @@ export default function RootLayout({
             </WishlistProvider>
           </DataProvider>
         </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

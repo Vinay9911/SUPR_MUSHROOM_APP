@@ -2,13 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Leaf, X, ArrowRight, Phone, ChefHat, HelpCircle } from 'lucide-react';
-import toast from 'react-hot-toast';
-import { Product } from '@/types'; 
-
-// --- CONFIGURATION ---
-// SECURE FIX: Now using environment variable
-const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY || '';
-const GROQ_MODEL = 'llama-3.1-8b-instant';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Product } from '@/types';
 
 // --- STATIC KNOWLEDGE BASE ---
 const KNOWLEDGE_BASE = {
@@ -52,12 +47,14 @@ export const Chatbot: React.FC = () => {
   const [chefMessages, setChefMessages] = useState<Message[]>([
     { role: 'assistant', text: 'Bon Appétit! 👨‍🍳 I am your Mushroom Chef. Need a tasty recipe or cooking tip? 🍳' }
   ]);
-  
+
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // --- 1. FETCH REAL-TIME PRODUCTS ---
+  // --- 1. FETCH REAL-TIME PRODUCTS (LAZY LOAD) ---
   useEffect(() => {
+    if (!isOpen) return; // Only fetch when chat is opened
+
     const fetchProducts = async () => {
       try {
         const res = await fetch('/api/products');
@@ -69,8 +66,11 @@ export const Chatbot: React.FC = () => {
         console.error("Failed to fetch products for chatbot", error);
       }
     };
-    fetchProducts();
-  }, []);
+
+    if (products.length === 0) {
+      fetchProducts();
+    }
+  }, [isOpen, products.length]);
 
   // Auto-scroll
   const scrollToBottom = () => {
@@ -80,20 +80,19 @@ export const Chatbot: React.FC = () => {
 
   // --- 2. ROBUST SYSTEM PROMPT ---
   const getSystemPrompt = (tab: Tab) => {
-    // Dynamic Product List
-    const productList = products.length > 0 
+    const productList = products.length > 0
       ? products.map(p => `- ${p.name}: ₹${p.price}/${p.weight} | Status: ${p.stock > 0 ? 'In Stock' : 'Out of Stock'}`).join('\n')
       : "Product data loading...";
-    
+
     if (tab === 'support') {
       return `You are the Friendly Customer Support Agent for ${KNOWLEDGE_BASE.service.company}. 🍄
-      
+
       YOUR KNOWLEDGE:
       - STOCK & PRICES:\n${productList}
       - FARMING: We use ${KNOWLEDGE_BASE.farming.method}. It is ${KNOWLEDGE_BASE.farming.benefits}.
       - DELIVERY: ${KNOWLEDGE_BASE.service.delivery_areas.join(', ')} within ${KNOWLEDGE_BASE.service.delivery_time}.
       - CONTACT: ${KNOWLEDGE_BASE.service.contact_phone}
-      
+
       CRITICAL INSTRUCTIONS:
       1. FORMATTING: Do NOT use markdown (no **bold**, no *italics*). Send plain text only.
       2. Tone: Be warm, helpful, and use EMOJIS (😊, 🍄, 🚛).
@@ -114,15 +113,10 @@ export const Chatbot: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    
-    if (!GROQ_API_KEY) {
-      toast.error("AI Service Unavailable (Missing Key)");
-      return;
-    }
-    
+
     const userText = input.trim();
     const currentTab = activeTab;
-    
+
     const newMessage: Message = { role: 'user', text: userText };
     if (currentTab === 'support') setSupportMessages(prev => [...prev, newMessage]);
     else setChefMessages(prev => [...prev, newMessage]);
@@ -137,36 +131,31 @@ export const Chatbot: React.FC = () => {
         content: m.text
       }));
 
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: GROQ_MODEL,
           messages: [
             { role: 'system', content: getSystemPrompt(currentTab) },
             ...recentHistory,
             { role: 'user', content: userText }
           ],
-          temperature: 0.7,
-          max_tokens: 200
         })
       });
 
       const data = await response.json();
-      
-      if (!response.ok) throw new Error(data.error?.message || 'API Error');
 
-      const botText = data.choices[0]?.message?.content || "I'm having trouble thinking right now. 😵‍💫";
+      if (!response.ok) throw new Error(data.error || 'API Error');
+
+      const botText = data.text || "I'm having trouble thinking right now. 😵‍💫";
 
       const botMessage: Message = { role: 'assistant', text: botText };
       if (currentTab === 'support') setSupportMessages(prev => [...prev, botMessage]);
       else setChefMessages(prev => [...prev, botMessage]);
 
     } catch (error) {
-      console.error('Groq API Error:', error);
+      // Handled gracefully below — warn (not error) so it doesn't trip the dev overlay
+      console.warn('Chat API unavailable:', error);
       const errorMsg: Message = { role: 'assistant', text: "Oops! My connection is a bit fuzzy. 📶 Please try again." };
       if (currentTab === 'support') setSupportMessages(prev => [...prev, errorMsg]);
       else setChefMessages(prev => [...prev, errorMsg]);
@@ -199,70 +188,123 @@ export const Chatbot: React.FC = () => {
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-4 font-sans">
-      
-      {showOptions && !isOpen && (
-        <div className="bg-white rounded-2xl shadow-xl border border-brand-cream overflow-hidden mb-2 animate-in slide-in-from-bottom-2 fade-in duration-200 w-64">
-          <button onClick={openAIChat} className="flex items-center gap-3 w-full px-5 py-4 hover:bg-brand-light transition-colors border-b border-gray-100 text-left">
-            <div className="bg-brand-brown/10 text-brand-brown p-2 rounded-full"><Leaf size={18} /></div>
-            <div><p className="font-bold text-gray-800 text-sm">AI Assistant</p><p className="text-xs text-gray-500">Support & Recipes</p></div>
-          </button>
-          <button onClick={openWhatsapp} className="flex items-center gap-3 w-full px-5 py-4 hover:bg-brand-light transition-colors text-left">
-            <div className="bg-green-100 text-green-600 p-2 rounded-full"><Phone size={18} /></div>
-            <div><p className="font-bold text-gray-800 text-sm">WhatsApp</p><p className="text-xs text-gray-500">{KNOWLEDGE_BASE.service.contact_phone}</p></div>
-          </button>
-        </div>
-      )}
 
-      {isOpen && (
-        <div className="bg-white w-[90vw] sm:w-96 h-[550px] rounded-3xl shadow-2xl flex flex-col border border-brand-cream animate-in slide-in-from-bottom-5 overflow-hidden">
-           <div className="p-4 bg-brand-brown text-white flex justify-between items-center shadow-md">
-             <div className="flex items-center gap-2">
-                <Leaf size={20} className="text-white/90" />
+      {/* Quick options popup */}
+      <AnimatePresence>
+        {showOptions && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 16, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.9 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+            className="bg-white/90 dark:bg-bg-color/90 backdrop-blur-xl rounded-2xl shadow-xl border border-brand-cream dark:border-white/10 overflow-hidden mb-2 w-64 origin-bottom-right"
+          >
+            <button onClick={openAIChat} className="flex items-center gap-3 w-full px-5 py-4 hover:bg-brand-light dark:hover:bg-white/5 transition-colors border-b border-brand-cream dark:border-white/10 text-left">
+              <div className="bg-brand-brown/10 text-brand-brown p-2 rounded-full"><Leaf size={18} /></div>
+              <div><p className="font-bold text-brand-text text-sm">AI Assistant</p><p className="text-xs text-brand-muted">Support &amp; Recipes</p></div>
+            </button>
+            <button onClick={openWhatsapp} className="flex items-center gap-3 w-full px-5 py-4 hover:bg-brand-light dark:hover:bg-white/5 transition-colors text-left">
+              <div className="bg-green-100 dark:bg-green-500/15 text-green-600 dark:text-green-400 p-2 rounded-full"><Phone size={18} /></div>
+              <div><p className="font-bold text-brand-text text-sm">WhatsApp</p><p className="text-xs text-brand-muted">{KNOWLEDGE_BASE.service.contact_phone}</p></div>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Chat window */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 26 }}
+            className="bg-white/95 dark:bg-bg-color/95 backdrop-blur-xl w-[90vw] sm:w-96 h-[550px] rounded-3xl shadow-2xl flex flex-col border border-brand-cream dark:border-white/10 overflow-hidden origin-bottom-right"
+          >
+            {/* Header */}
+            <div className="p-4 bg-gradient-to-r from-brand-brown to-brand-dark text-white flex justify-between items-center shadow-md relative overflow-hidden">
+              <div className="absolute -right-6 -top-10 w-28 h-28 bg-white/10 rounded-full blur-2xl" />
+              <div className="flex items-center gap-2 relative z-10">
+                <motion.div animate={{ rotate: [0, 10, -10, 0] }} transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}>
+                  <Leaf size={20} className="text-white/90" />
+                </motion.div>
                 <div><h3 className="font-bold text-sm leading-tight">Supr Assistant</h3><p className="text-[10px] text-white/70">Powered by Llama 3</p></div>
-             </div>
-             <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors"><X size={20} /></button>
-           </div>
-           
-           <div className="flex bg-gray-100 p-1 m-2 rounded-xl">
-              <button onClick={() => setActiveTab('support')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'support' ? 'bg-white text-brand-brown shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><HelpCircle size={14} /> Support</button>
-              <button onClick={() => setActiveTab('chef')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'chef' ? 'bg-white text-brand-brown shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><ChefHat size={14} /> Master Chef</button>
-           </div>
-           
-           <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
-             {currentMessages.map((m, i) => (
-               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`p-3 rounded-2xl text-sm max-w-[85%] shadow-sm ${m.role === 'user' ? 'bg-brand-brown text-white rounded-tr-none' : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none'}`}>
-                    {/* CLEANED TEXT RENDERING */}
+              </div>
+              <button onClick={() => setIsOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors relative z-10"><X size={20} /></button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex bg-brand-cream dark:bg-white/5 p-1 m-2 rounded-xl">
+              <button onClick={() => setActiveTab('support')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'support' ? 'bg-white dark:bg-brand-darkCream text-brand-brown shadow-sm' : 'text-brand-muted hover:text-brand-text'}`}><HelpCircle size={14} /> Support</button>
+              <button onClick={() => setActiveTab('chef')} className={`flex-1 flex items-center justify-center gap-2 py-2 text-xs font-bold rounded-lg transition-all ${activeTab === 'chef' ? 'bg-white dark:bg-brand-darkCream text-brand-brown shadow-sm' : 'text-brand-muted hover:text-brand-text'}`}><ChefHat size={14} /> Master Chef</button>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-brand-light/40 dark:bg-transparent">
+              {currentMessages.map((m, i) => (
+                <motion.div
+                  key={`${activeTab}-${i}`}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`p-3 rounded-2xl text-sm max-w-[85%] shadow-sm whitespace-pre-wrap leading-relaxed ${m.role === 'user' ? 'bg-brand-brown text-white rounded-tr-none' : 'bg-white dark:bg-brand-darkCream border border-brand-cream dark:border-white/10 text-brand-text rounded-tl-none'}`}>
                     {cleanText(m.text)}
                   </div>
-               </div>
-             ))}
-             {isTyping && (
-               <div className="flex justify-start">
-                 <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-tl-none shadow-sm">
-                   <div className="flex gap-1">
-                     <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
-                     <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
-                     <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
-                   </div>
-                 </div>
-               </div>
-             )}
-             <div ref={messagesEndRef} />
-           </div>
-           
-           <div className="p-3 border-t border-gray-100 bg-white">
-             <form onSubmit={(e) => {e.preventDefault(); handleSend()}} className="flex gap-2 relative">
-               <input value={input} onChange={e=>setInput(e.target.value)} className="flex-1 bg-gray-100 rounded-full pl-4 pr-10 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-brown/50 transition-all text-gray-800 placeholder:text-gray-400" placeholder={activeTab === 'support' ? "Ask about orders... 🛒" : "Ask for recipes... 🥘"} disabled={isTyping}/>
-               <button type="submit" disabled={isTyping || !input.trim()} className="absolute right-1.5 top-1.5 bg-brand-brown text-white p-1.5 rounded-full hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"><ArrowRight size={18}/></button>
-             </form>
-           </div>
-        </div>
-      )}
+                </motion.div>
+              ))}
+              {isTyping && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                  <div className="bg-white dark:bg-brand-darkCream border border-brand-cream dark:border-white/10 p-3 rounded-2xl rounded-tl-none shadow-sm">
+                    <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-brand-muted rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-brand-muted rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-brand-muted rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
 
-      <button onClick={handleMainClick} className={`p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${isOpen || showOptions ? 'bg-brand-dark rotate-90' : 'bg-brand-brown'} text-white`}>
+            {/* Input */}
+            <div className="p-3 border-t border-brand-cream dark:border-white/10 bg-white/50 dark:bg-transparent">
+              <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="flex gap-2 relative">
+                <input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  className="flex-1 bg-brand-cream dark:bg-white/5 rounded-full pl-4 pr-12 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-brown/50 transition-all text-brand-text placeholder:text-brand-muted"
+                  placeholder={activeTab === 'support' ? "Ask about orders... 🛒" : "Ask for recipes... 🥘"}
+                  disabled={isTyping}
+                />
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  type="submit"
+                  disabled={isTyping || !input.trim()}
+                  className="absolute right-1.5 top-1.5 bottom-1.5 aspect-square bg-brand-brown text-white rounded-full grid place-items-center hover:bg-brand-dark disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  <ArrowRight size={18} />
+                </motion.button>
+              </form>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating action button */}
+      <motion.button
+        suppressHydrationWarning
+        onClick={handleMainClick}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        animate={{ rotate: isOpen || showOptions ? 90 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        aria-label="Open assistant"
+        className={`p-4 rounded-full shadow-2xl shadow-brand-brown/30 text-white ${isOpen || showOptions ? 'bg-brand-dark' : 'bg-brand-brown'}`}
+      >
         {isOpen ? <X size={24} /> : <MessageSquare size={24} />}
-      </button>
+      </motion.button>
     </div>
   );
 };

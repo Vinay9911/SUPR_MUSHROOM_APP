@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useContext } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ChefHat, Sparkles, ShoppingCart, Loader2 } from 'lucide-react';
 
 import { CartContext } from '@/components/providers/CartProvider';
@@ -16,11 +15,6 @@ export default function AIChefPage() {
   const [loading, setLoading] = useState(false);
   
   const generateRecipe = async () => {
-    
-    const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    
-    if (!API_KEY) return toast.error("API Key missing");
-
     setLoading(true);
     setRecipe('');
     
@@ -29,22 +23,22 @@ export default function AIChefPage() {
         ? cart.map(i => i.product.name).join(', ') 
         : "Oyster Mushrooms, Shiitake Mushrooms";
 
-      const genAI = new GoogleGenerativeAI(API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
-      const prompt = `You are a Michelin Star Chef specializing in vegetarian organic cuisine. 
-      Create a unique, healthy recipe using these main ingredients: ${ingredients}. 
-      Format nicely with: 
-      1. Creative Name 
-      2. Ingredients List 
-      3. Step-by-Step Instructions. 
-      Keep it under 300 words.`;
+      const response = await fetch('/api/recipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredients }),
+      });
 
-      const result = await model.generateContent(prompt);
-      setRecipe(result.response.text());
-    } catch (error) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Recipe generation failed');
+      }
+
+      setRecipe(data.recipe);
+    } catch (error: any) {
       console.error(error);
-      toast.error("Chef is busy. Try again!");
+      toast.error(error.message || "Chef is busy. Try again!");
     } finally {
       setLoading(false);
     }

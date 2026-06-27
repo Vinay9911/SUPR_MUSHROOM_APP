@@ -25,8 +25,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
   const [couponCode, setCouponCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
-  const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
-
   useEffect(() => {
     if (isOpen) {
       const fetchData = async () => {
@@ -35,13 +33,6 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
         if (user) {
            setFormData(prev => ({ ...prev, email: user.email || '' }));
         }
-
-        // 2. Get Coupons
-        const { data } = await supabase
-          .from('coupons')
-          .select('*')
-          .eq('is_active', true);
-        if (data) setAvailableCoupons(data);
       };
       fetchData();
     }
@@ -88,23 +79,29 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
     if (!couponCode) return;
     setLoading(true);
     
-    // Check loaded coupons first
-    const coupon = availableCoupons.find(c => c.code === couponCode.toUpperCase());
-    
-    if (coupon) {
-      applyCouponLogic(coupon);
-    } else {
-      // Check DB if not loaded
-      const { data } = await supabase.from('coupons').select('*').eq('code', couponCode.toUpperCase()).single();
-      if (data && data.is_active) {
-         applyCouponLogic(data);
+    try {
+      const response = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.coupon) {
+        applyCouponLogic(data.coupon);
       } else {
-         toast.error("Invalid or expired coupon");
-         setAppliedCoupon(null);
-         setDiscount(0);
+        toast.error(data.error || "Invalid or expired coupon");
+        setAppliedCoupon(null);
+        setDiscount(0);
       }
+    } catch (error) {
+      toast.error("Failed to validate coupon");
+      setAppliedCoupon(null);
+      setDiscount(0);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,6 +110,12 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
     if (paymentMethod === 'UPI' && !paymentFile) {
       toast.error("Please upload the payment screenshot");
+      return;
+    }
+
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone.replace(/\D/g, ''))) {
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
 
@@ -151,9 +154,13 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: userId,
           guest_email: !userId ? formData.email : null,
-          shipping_address: `${formData.name}, ${formData.address}, Ph: ${formData.phone}, Email: ${formData.email}`,
+          shipping_address: JSON.stringify({
+            name: formData.name,
+            address: formData.address,
+            phone: formData.phone,
+            email: formData.email
+          }),
           payment_method: paymentMethod === 'UPI' ? 'UPI' : 'Cash on Delivery',
           payment_proof_url: paymentProofUrl,
           coupon_code: appliedCoupon,
@@ -192,11 +199,11 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-bg-color rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-          <h2 className="font-bold text-lg text-gray-800">Checkout</h2>
+        <div className="p-4 border-b border-brand-cream flex justify-between items-center bg-brand-light">
+          <h2 className="font-bold text-lg text-brand-text">Checkout</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-full transition-colors"><X size={20}/></button>
         </div>
 
@@ -205,36 +212,36 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
           
           {/* Left Column: Summary */}
           <div>
-            <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-4">Order Summary</h3>
+            <h3 className="font-bold text-brand-muted text-xs uppercase tracking-wider mb-4">Order Summary</h3>
             <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
               {cartContext.cart.map(item => (
-                <div key={item.productId} className="flex gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                  <img src={item.product.images[0]} className="w-16 h-16 rounded-lg object-cover bg-white" alt={item.product.name} />
+                <div key={item.productId} className="flex gap-3 bg-brand-light p-2 rounded-xl border border-brand-cream">
+                  <img src={item.product.images[0]} className="w-16 h-16 rounded-lg object-cover bg-white dark:bg-bg-color" alt={item.product.name} />
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="font-bold text-sm text-gray-800 line-clamp-1">{item.product.name}</p>
+                      <p className="font-bold text-sm text-brand-text line-clamp-1">{item.product.name}</p>
                       {item.isPreOrder && (
                         <span className="text-[10px] bg-blue-900 text-white px-1.5 py-0.5 rounded font-bold">PRE-ORDER</span>
                       )}
                     </div>
-                    <span className="text-xs text-gray-500">Qty: {item.quantity}</span>
+                    <span className="text-xs text-brand-muted">Qty: {item.quantity}</span>
                   </div>
-                  <div className="font-bold text-sm flex items-end pb-1 text-gray-700">₹{item.product.price * item.quantity}</div>
+                  <div className="font-bold text-sm flex items-end pb-1 text-brand-text">₹{item.product.price * item.quantity}</div>
                 </div>
               ))}
             </div>
             
             {/* Coupon Section */}
-            <div className="mt-6 pt-4 border-t border-gray-100">
-              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Apply Coupon</label>
+            <div className="mt-6 pt-4 border-t border-brand-cream">
+              <label className="text-xs font-bold text-brand-muted uppercase tracking-wider mb-2 block">Apply Coupon</label>
               <div className="flex gap-2 mb-2">
                 <div className="relative flex-1">
-                  <Tag className="absolute left-3 top-2.5 text-gray-400" size={16}/>
+                  <Tag className="absolute left-3 top-2.5 text-brand-muted" size={16}/>
                   <input 
                     value={couponCode}
                     onChange={(e) => setCouponCode(e.target.value)}
                     placeholder="Enter code"
-                    className="w-full pl-10 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm uppercase focus:outline-none focus:border-gray-400"
+                    className="w-full pl-10 pr-3 py-2 bg-brand-light border border-brand-cream rounded-xl text-sm uppercase focus:outline-none focus:border-gray-400"
                     disabled={!!appliedCoupon}
                   />
                 </div>
@@ -248,54 +255,54 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
 
             {/* Totals */}
             <div className="mt-4 space-y-2">
-              <div className="flex justify-between text-sm text-gray-500"><span>Subtotal</span><span>₹{cartContext.total}</span></div>
+              <div className="flex justify-between text-sm text-brand-muted"><span>Subtotal</span><span>₹{cartContext.total}</span></div>
               {discount > 0 && <div className="flex justify-between text-sm text-green-600 font-bold"><span>Discount</span><span>-₹{discount}</span></div>}
-              <div className="flex justify-between font-bold text-lg text-gray-800 pt-2 border-t border-gray-100"><span>Total</span><span>₹{cartContext.total - discount}</span></div>
+              <div className="flex justify-between font-bold text-lg text-brand-text pt-2 border-t border-brand-cream"><span>Total</span><span>₹{cartContext.total - discount}</span></div>
             </div>
           </div>
 
           {/* Right Column: Form */}
           <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="flex items-center justify-between">
-               <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider">Shipping Details</h3>
-               <span className="text-[10px] bg-gray-100 px-2 py-1 rounded border border-gray-200 text-gray-500">
+               <h3 className="font-bold text-brand-muted text-xs uppercase tracking-wider">Shipping Details</h3>
+               <span className="text-[10px] bg-brand-cream px-2 py-1 rounded border border-brand-cream text-brand-muted">
                  {formData.email && !cartContext.isLoading ? 'Verified' : 'Guest'}
                </span>
             </div>
             
-            <input required placeholder="Full Name" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-gray-400 text-sm"/>
-            <input required type="email" placeholder="Email (Required)" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-gray-400 text-sm"/>
-            <input required placeholder="Phone Number" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-gray-400 text-sm"/>
-            <textarea required placeholder="Full Address with Pincode" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-gray-400 h-20 text-sm resize-none"/>
+            <input required placeholder="Full Name" value={formData.name} onChange={e=>setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-brand-light dark:bg-black/20 border border-brand-cream dark:border-gray-800 rounded-xl outline-none focus:border-gray-400 text-sm"/>
+            <input required type="email" placeholder="Email (Required)" value={formData.email} onChange={e=>setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-brand-light dark:bg-black/20 border border-brand-cream dark:border-gray-800 rounded-xl outline-none focus:border-gray-400 text-sm"/>
+            <input required placeholder="Phone Number" value={formData.phone} onChange={e=>setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-brand-light dark:bg-black/20 border border-brand-cream dark:border-gray-800 rounded-xl outline-none focus:border-gray-400 text-sm"/>
+            <textarea required placeholder="Full Address with Pincode" value={formData.address} onChange={e=>setFormData({...formData, address: e.target.value})} className="w-full p-3 bg-brand-light dark:bg-black/20 border border-brand-cream dark:border-gray-800 rounded-xl outline-none focus:border-gray-400 h-20 text-sm resize-none"/>
             
-            <h3 className="font-bold text-gray-400 text-xs uppercase tracking-wider mb-2 mt-6">Payment Method</h3>
+            <h3 className="font-bold text-brand-muted text-xs uppercase tracking-wider mb-2 mt-6">Payment Method</h3>
             <div className="grid grid-cols-2 gap-3">
-               <button type="button" onClick={()=>setPaymentMethod('COD')} className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${paymentMethod === 'COD' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+               <button type="button" onClick={()=>setPaymentMethod('COD')} className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${paymentMethod === 'COD' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white dark:bg-brand-light border-brand-cream dark:border-brand-cream/20 text-brand-muted dark:text-brand-muted hover:border-gray-300 dark:hover:border-brand-cream/40'}`}>
                   <Banknote size={24}/> <span className="text-xs font-bold">Cash on Delivery</span>
                </button>
-               <button type="button" onClick={()=>setPaymentMethod('UPI')} className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${paymentMethod === 'UPI' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'}`}>
+               <button type="button" onClick={()=>setPaymentMethod('UPI')} className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${paymentMethod === 'UPI' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white dark:bg-brand-light border-brand-cream dark:border-brand-cream/20 text-brand-muted dark:text-brand-muted hover:border-gray-300 dark:hover:border-brand-cream/40'}`}>
                   <CreditCard size={24}/> <span className="text-xs font-bold">Pay via UPI</span>
                </button>
             </div>
 
             {paymentMethod === 'UPI' && (
-               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 animate-in slide-in-from-top-2">
-                  <p className="text-xs text-gray-500 uppercase font-bold mb-2">1. Send Payment To:</p>
-                  <div className="flex items-center gap-2 bg-white p-3 rounded-lg border border-gray-200 mb-4">
-                     <span className="font-mono font-bold text-gray-800 flex-1">8826986127@kotak</span>
-                     <button type="button" onClick={copyToClipboard} className="text-gray-600 hover:text-black">
+               <div className="bg-brand-light dark:bg-black/20 border border-brand-cream dark:border-gray-800 rounded-xl p-4 animate-in slide-in-from-top-2">
+                  <p className="text-xs text-brand-muted uppercase font-bold mb-2">1. Send Payment To:</p>
+                  <div className="flex items-center gap-2 bg-white dark:bg-brand-light p-3 rounded-lg border border-brand-cream dark:border-brand-cream/20 mb-4">
+                     <span className="font-mono font-bold text-brand-text flex-1">8826986127@kotak</span>
+                     <button type="button" onClick={copyToClipboard} className="text-brand-muted hover:text-black">
                         {copied ? <Check size={18} className="text-green-500"/> : <Copy size={18}/>}
                      </button>
                   </div>
 
-                  <p className="text-xs text-gray-500 uppercase font-bold mb-2">2. Upload Screenshot:</p>
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                  <p className="text-xs text-brand-muted uppercase font-bold mb-2">2. Upload Screenshot:</p>
+                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 dark:border-brand-cream/30 border-dashed rounded-xl cursor-pointer bg-white dark:bg-brand-light hover:bg-brand-light dark:hover:bg-brand-cream/10 transition-colors">
                      {paymentFile ? (
                         <div className="flex items-center gap-2 text-green-600 font-bold text-sm">
                            <Check size={16} /> {paymentFile.name.slice(0, 20)}...
                         </div>
                      ) : (
-                        <div className="flex flex-col items-center gap-1 text-gray-400">
+                        <div className="flex flex-col items-center gap-1 text-brand-muted">
                            <Upload size={20} />
                            <span className="text-xs">Click to upload screenshot</span>
                         </div>
@@ -308,7 +315,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose })
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
+        <div className="p-4 border-t border-brand-cream bg-brand-light">
           <button form="checkout-form" disabled={loading} className="w-full bg-orange-600 text-white py-4 rounded-xl font-bold hover:bg-orange-700 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-orange-200 disabled:opacity-70 disabled:cursor-not-allowed">
             {loading ? <Loader2 className="animate-spin"/> : (
                paymentMethod === 'COD' ? <span>Place Order (COD) <ArrowRight className="inline" size={18}/></span> : <span>Confirm Payment <ArrowRight className="inline" size={18}/></span>

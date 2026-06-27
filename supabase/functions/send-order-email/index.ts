@@ -1,6 +1,6 @@
 // FILE: supabase/functions/send-order-email/index.ts
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+// Deno built-in serve is used below
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import nodemailer from 'npm:nodemailer@6.9.7';
 
@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -17,7 +17,7 @@ serve(async (req) => {
 
   try {
     console.log('🚀 Function invoked (Gmail SMTP)');
-    
+
     // 1. Load Secrets
     const SMTP_EMAIL = Deno.env.get('SMTP_EMAIL');
     const SMTP_PASSWORD = Deno.env.get('SMTP_PASSWORD');
@@ -31,7 +31,7 @@ serve(async (req) => {
     // 2. Parse Payload
     const payload = await req.json();
     const { record } = payload;
-    
+
     if (!record || !record.id) {
       throw new Error('No order ID in payload');
     }
@@ -39,7 +39,7 @@ serve(async (req) => {
 
     // 3. Fetch Order Details
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    
+
     const { data: order, error } = await supabase
       .from('orders')
       .select(`
@@ -59,7 +59,7 @@ serve(async (req) => {
 
     // 4. Determine Recipient Email
     let recipientEmail = order.guest_email;
-    
+
     // If no guest email, try to fetch from User Profile
     if (!recipientEmail && order.user_id) {
       const { data: userData } = await supabase.auth.admin.getUserById(order.user_id);
@@ -73,8 +73,31 @@ serve(async (req) => {
       });
     }
 
-    // 5. Build HTML Table
-    const itemsHtml = (order.order_items || [])
+    // 5. Parse the shipping address (stored as JSON) into a clean block
+    let addressHtml = String(order.shipping_address ?? '');
+    let customerName = '';
+    try {
+      const a = JSON.parse(order.shipping_address);
+      customerName = a.name || '';
+      addressHtml = [
+        a.name ? `<strong>${a.name}</strong>` : '',
+        a.address || '',
+        a.phone ? `📞 ${a.phone}` : '',
+        a.email ? `✉️ ${a.email}` : '',
+      ].filter(Boolean).join('<br/>');
+    } catch (_e) {
+      // shipping_address wasn't JSON — fall back to the raw string
+    }
+
+    // 6. Build HTML items table + totals
+    const items = order.order_items || [];
+    const subtotal = items.reduce(
+      (sum: number, i: any) => sum + Number(i.price_at_order) * Number(i.quantity),
+      0
+    );
+    const discount = Number(order.discount_applied || 0);
+
+    const itemsHtml = items
       .map((item: any) => `
         <tr>
           <td style="padding: 8px; border-bottom: 1px solid #eee;">
@@ -90,7 +113,7 @@ serve(async (req) => {
       `)
       .join('');
 
-    // 6. Configure Gmail Transporter
+    // 7. Configure Gmail Transporter
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -99,12 +122,12 @@ serve(async (req) => {
       },
     });
 
-    // 7. Send Email
+    // 8. Send Email
     console.log(`📧 Sending email to ${recipientEmail} from ${SMTP_EMAIL}...`);
-    
+
     const info = await transporter.sendMail({
       from: `"Supr Mushrooms" <${SMTP_EMAIL}>`, // Sends as "Supr Mushrooms"
-      to: recipientEmail, 
+      to: recipientEmail,
       subject: `Order Confirmation #${order.id.slice(0, 8).toUpperCase()}`,
       html: `
         <!DOCTYPE html>
@@ -117,6 +140,8 @@ serve(async (req) => {
             .content { padding: 20px; background: #fefae0; }
             table { width: 100%; border-collapse: collapse; margin: 20px 0; background: white; }
             th { background: #faedcd; padding: 10px; text-align: left; }
+            .totals { width: 100%; margin-top: 8px; }
+            .totals td { padding: 4px 8px; }
             .total { font-size: 20px; font-weight: bold; color: #bc6c25; text-align: right; padding-top: 10px; }
             .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
           </style>
@@ -127,21 +152,27 @@ serve(async (req) => {
               <h1>🍄 Supr Mushrooms</h1>
             </div>
             <div class="content">
-              <h2>Thank you for your order!</h2>
+              <h2>Thank you${customerName ? `, ${customerName}` : ''}!</h2>
+              <p>Your order has been received and is now being processed.</p>
               <p><strong>Order ID:</strong> #${order.id.slice(0, 8).toUpperCase()}</p>
               <p><strong>Payment:</strong> ${order.payment_method}</p>
               <p><strong>Status:</strong> ${order.status}</p>
-              
+
               <h3>Order Items:</h3>
               <table>
-                <thead><tr><th>Product</th><th>Qty</th><th>Price</th></tr></thead>
+                <thead><tr><th>Product</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Price</th></tr></thead>
                 <tbody>${itemsHtml}</tbody>
               </table>
-              
+
+              <table class="totals">
+                <tr><td>Subtotal</td><td style="text-align:right;">₹${subtotal}</td></tr>
+                ${discount > 0 ? `<tr><td style="color:#15803d;">Discount${order.coupon_code ? ` (${order.coupon_code})` : ''}</td><td style="text-align:right; color:#15803d;">-₹${discount}</td></tr>` : ''}
+              </table>
+
               <div class="total">Total: ₹${order.total_amount}</div>
-              
+
               <h3>Delivery To:</h3>
-              <p>${order.shipping_address}</p>
+              <p>${addressHtml}</p>
             </div>
             <div class="footer">
               <p>📧 ${SMTP_EMAIL} | 📞 +91-8826986127</p>

@@ -2,7 +2,8 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { ProductDetailPage } from '@/components/pages/ProductDetailPage'
-import { ProductSchema } from '@/components/shared/SEO'
+import { ProductSchema, BreadcrumbSchema } from '@/components/shared/SEO'
+import { SITE_URL } from '@/lib/config'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 export const revalidate = 1800 
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       images: product.images,
     },
     alternates: {
-      canonical: `https://supr-mushroom.vercel.app/product/${id}`,
+      canonical: `${SITE_URL}/product/${id}`,
     }
   }
 }
@@ -81,19 +82,25 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   }
 
   const seoData = {
+    id: id,
     name: product.name,
     description: product.description,
     images: product.images,
     price: product.price,
     currency: 'INR',
     stock: product.stock,
-    rating: product.rating || 5,
-    reviews: product.reviews_count || 120
+    rating: product.rating,
+    reviews: product.reviews_count
   }
 
   return (
     <>
       <ProductSchema product={seoData} />
+      <BreadcrumbSchema items={[
+        { name: 'Home', url: SITE_URL },
+        { name: 'Shop', url: `${SITE_URL}/#shop` },
+        { name: product.name, url: `${SITE_URL}/product/${id}` },
+      ]} />
       <ProductDetailPage product={product} />
     </>
   )

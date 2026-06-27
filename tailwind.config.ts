@@ -6,18 +6,20 @@ const config: Config = {
     './components/**/*.{js,ts,jsx,tsx,mdx}',
     './app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        'bg-color': 'rgb(var(--bg-color) / <alpha-value>)',
         brand: {
-          brown: '#bc6c25',
-          dark: '#8b4513',
-          cream: '#faedcd',
-          light: '#fefae0',
-          darkCream: '#e9dcc4',
-          green: '#18b918',
-          text: '#2d2d2d',
-          muted: '#666666',
+          brown: 'rgb(var(--brand-brown) / <alpha-value>)',
+          dark: 'rgb(var(--brand-dark) / <alpha-value>)',
+          cream: 'rgb(var(--brand-cream) / <alpha-value>)',
+          light: 'rgb(var(--brand-light) / <alpha-value>)',
+          darkCream: 'rgb(var(--brand-darkCream) / <alpha-value>)',
+          green: 'rgb(var(--brand-green) / <alpha-value>)',
+          text: 'rgb(var(--brand-text) / <alpha-value>)',
+          muted: 'rgb(var(--brand-muted) / <alpha-value>)',
         },
       },
       fontFamily: {

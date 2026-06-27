@@ -24,7 +24,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // 1. Fetch from 'products' table ONLY (No joins needed anymore)
       const { data: productsData, error } = await supabase
         .from('products')
-        .select('*')
+        .select('*, categories(name)')
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -33,7 +33,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: p.id,
         name: p.name,
         description: p.description,
-        category: p.category_id ? Category.MUSHROOMS : Category.SAFFRON,
+        category: p.categories?.name === 'Saffron' ? Category.SAFFRON : Category.MUSHROOMS,
         farming_method: p.farming_method as FarmingMethod,
         images: p.images || [],
         

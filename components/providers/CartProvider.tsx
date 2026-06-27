@@ -58,13 +58,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadCart();
   }, [user]);
 
-  // 2. PERSISTENCE
+  // 2. PERSISTENCE (Debounced DB Sync)
   useEffect(() => {
     if (user) {
-      const saveToDb = async () => {
+      const timeoutId = setTimeout(async () => {
         await supabase.from('carts').upsert({ user_id: user.id, items: cart }, { onConflict: 'user_id' });
-      };
-      saveToDb();
+      }, 1500); // 1.5s debounce
+      
+      return () => clearTimeout(timeoutId);
     } else {
       localStorage.setItem('supr_cart', JSON.stringify(cart));
     }

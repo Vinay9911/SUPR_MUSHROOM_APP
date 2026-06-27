@@ -67,7 +67,7 @@ export default function WishlistPage() {
                     <button 
                       onClick={() => moveToCart(product)}
                       disabled={product.stock === 0}
-                      className="bg-brand-text text-white p-2.5 rounded-xl hover:bg-brand-brown disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors shadow-lg shadow-black/5"
+                      className="bg-brand-text text-white p-2.5 rounded-xl hover:bg-brand-brown disabled:bg-gray-200 disabled:text-brand-muted disabled:cursor-not-allowed transition-colors shadow-lg shadow-black/5"
                       title="Move to Cart"
                     >
                       <ShoppingBag size={18} />

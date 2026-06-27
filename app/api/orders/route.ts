@@ -12,22 +12,33 @@ export async function POST(request: Request) {
       payment_method, 
       payment_proof_url,
       coupon_code,
-      user_id, 
       guest_email 
     } = body;
 
-    // 1. Validate Items & Calculate Total Server-Side
+    // SECURITY: Extract user_id from the authenticated session, NOT the request body.
+    // This prevents users from placing orders as other users.
+    const { data: { user } } = await supabase.auth.getUser();
+    const user_id = user?.id || null;
+
+    // 1. Validate Items & Calculate Total Server-Side (Fix N+1 Query)
+    const productIds = items.map((i: any) => i.productId);
+    
+    const { data: products, error: productsError } = await supabase
+      .from('products')
+      .select('id, price, stock, name, status')
+      .in('id', productIds);
+
+    if (productsError || !products) {
+      return NextResponse.json({ error: 'Failed to fetch products for validation' }, { status: 400 });
+    }
+
     let calculatedTotal = 0;
     const validatedItems = [];
 
     for (const item of items) {
-      const { data: product, error } = await supabase
-        .from('products')
-        .select('id, price, stock, name, status')
-        .eq('id', item.productId)
-        .single();
+      const product = products.find(p => p.id === item.productId);
 
-      if (error || !product) {
+      if (!product) {
         return NextResponse.json({ error: `Product not found: ${item.productId}` }, { status: 400 });
       }
 

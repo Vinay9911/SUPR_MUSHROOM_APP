@@ -13,6 +13,10 @@ export default function ResetPasswordPage() {
 
   const handleUpdate = async () => {
     if (!password) return toast.error("Please enter a password");
+    if (password.length < 8) return toast.error("Password must be at least 8 characters long");
+    if (!/[0-9]/.test(password)) return toast.error("Password must contain at least one number");
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) return toast.error("Password must contain at least one special character");
+    
     setLoading(true);
     
     const { error } = await supabase.auth.updateUser({ password });

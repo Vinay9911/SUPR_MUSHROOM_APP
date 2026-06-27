@@ -1,172 +1,183 @@
+# 🍄 Supr Mushrooms — Next.js E-commerce
 
-# 🍄 Supr Mushrooms - Premium Organic Mushroom Delivery App
+Online store for a Delhi-NCR organic mushroom farm. Customers browse, add to cart/wishlist,
+and check out (COD or UPI with a payment-proof upload). An admin dashboard manages products,
+orders, coupons and customers.
 
-**Supr Mushrooms** is a full-stack e-commerce application built with Next.js 16 (App Router) for a premium vertical farming business in Delhi NCR. The platform facilitates the sale and delivery of fresh, organic mushrooms (Oyster, Button, Cremini, etc.) directly to consumers and B2B clients.
+🚀 **Live:** [supr-mushroom.vercel.app](https://supr-mushroom.vercel.app)
+📑 **Deeper docs:** [CLAUDE.md](./CLAUDE.md) (full DB schema, RLS model, workflows).
 
-🚀 **Live Demo:** [https://supr-mushroom.vercel.app](https://supr-mushroom.vercel.app)
-
-<img width="1694" height="1078" alt="Screenshot 2026-01-25 015527" src="https://github.com/user-attachments/assets/2417cfcb-8572-4dd8-99af-2e0fb0881813" />
-
----
-
-## ✨ Key Features
-
-### 🛍️ E-Commerce Experience
-
-* **Product Catalog:** Browse fresh mushroom varieties with details on weight, price, and stock status.
-* **Cart & Checkout:** Fully functional shopping cart with quantity management and order summary.
-* **Wishlist:** Users can save their favorite products for later.
-* **Smart Search & Filtering:** (Implied) Efficient product discovery.
-
-### 🤖 AI-Powered Support
-
-* **Gemini AI Chatbot:** An integrated AI assistant powered by **Google Gemini 1.5 Flash**. It answers customer queries about mushroom types, pricing, delivery areas, and farming methods in real-time.
-
-### 🔐 Authentication & Backend
-
-* **Supabase Auth:** Secure user authentication (Sign Up/Login).
-* **Real-time Database:** Supabase handles product inventory, user orders, and wishlists.
-* **Admin Dashboard:** Dedicated interface for managing products, orders, and inventory (located at `/admin`).
-
-### 🎨 UI/UX & Performance
-
-* **Modern Design:** Built with **Tailwind CSS** and **Framer Motion** for smooth animations (fade-ins, stagger effects).
-* **Responsive:** Fully optimized for mobile, tablet, and desktop views.
-* **SEO Optimized:** Server-side rendering and semantic HTML for better search engine visibility in the Delhi NCR region.
-
----
-
-## 🛠️ Tech Stack
-
-* **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
-* **Language:** [TypeScript](https://www.typescriptlang.org/)
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/), [clsx](https://www.npmjs.com/package/clsx), [tailwind-merge](https://www.npmjs.com/package/tailwind-merge)
-* **Icons:** [Lucide React](https://lucide.dev/)
-* **Animations:** [Framer Motion](https://www.framer.com/motion/)
-* **Backend / DB:** [Supabase](https://supabase.com/) (PostgreSQL, Auth)
-* **AI Integration:** [Google Generative AI SDK](https://www.npmjs.com/package/@google/generative-ai) (Gemini)
-* **Charts:** [Recharts](https://recharts.org/) (for Admin analytics)
-* **Toast Notifications:** [React Hot Toast](https://react-hot-toast.com/)
-
----
-
-## 🚀 Getting Started
-
-Follow these steps to set up the project locally.
-
-### Prerequisites
-
-* Node.js (v18 or higher recommended)
-* npm or yarn
-* A Supabase project
-* A Google Cloud Project with Gemini API enabled
-
-### 1. Clone the Repository
+**Stack:** Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS · Framer Motion · Supabase (DB + Auth + Storage + Edge Functions) · Groq + Google Gemini (AI) · Vercel.
 
 ```bash
-git clone https://github.com/vinay9911/supr_mushroom_app.git
-cd supr_mushroom_app
-
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-# or
-yarn install
-
-```
-
-### 3. Environment Configuration
-
-Create a `.env.local` file in the root directory and add the following environment variables. You will need credentials from Supabase and Google AI Studio.
-
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# App Configuration
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-ADMIN_EMAIL=vinayaggarwal271@gmail.com
-
-# Google Gemini AI (For Chatbot)
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
-
-```
-
-### 4. Run the Development Server
-
-```bash
-npm run dev
-# or
-yarn dev
-
-```
-
-Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) with your browser to see the result.
-
----
-
-## 📂 Project Structure
-
-```bash
-├── app/                  # Next.js App Router pages
-│   ├── admin/            # Admin dashboard routes
-│   ├── api/              # API routes (orders, webhooks, products)
-│   ├── product/[id]/     # Product detail pages
-│   ├── globals.css       # Global styles
-│   └── layout.tsx        # Root layout
-├── components/           # React components
-│   ├── pages/            # Page-specific components (HomePage, etc.)
-│   ├── providers/        # Context Providers (Cart, Auth, Wishlist)
-│   ├── shared/           # Shared components (SEO, etc.)
-│   └── ui/               # UI components (Navbar, Chatbot, Cards)
-├── lib/                  # Utility functions
-│   ├── config.ts         # App constants and env vars
-│   ├── supabase/         # Supabase client & server setup
-│   └── utils.ts          # Helper functions
-├── public/               # Static assets (images, icons)
-├── types/                # TypeScript interfaces
-└── ...config files
-
+npm install      # install dependencies
+npm run dev      # local dev  → http://localhost:3000
+npm run build    # production build (also typechecks)
+npm run start    # serve the production build
 ```
 
 ---
 
-## 🧪 Farming Methods
+## 🧭 Why backend & frontend look "mixed"
 
-The application highlights the business's unique selling proposition:
+This is a **Next.js App Router** project, so **server (backend) and browser (frontend) code live in the same tree by design** — that's normal for Next.js, not a mistake. The rule:
 
-* **Aeroponic Technology:** Growing without soil or heavy metals.
-* **Vertical Farming:** Climate-controlled environments (IoT monitored).
-* **Organic Guarantee:** 100% pesticide-free and zero contamination.
+| Runs on the **server** 🟥 (backend) | Runs in the **browser** 🟦 (frontend) | **Shared** ⬜ |
+|---|---|---|
+| `app/api/**/route.ts` (API endpoints) | any file starting with `'use client'` | `types/` |
+| `proxy.ts` (auth middleware) | `components/**` (all UI) | `lib/config.ts`, `lib/utils.ts` |
+| `lib/supabase/server.ts` | `lib/supabase/client.ts` | config files |
+| `supabase/functions/**` (edge function) | `components/providers/**` (contexts) | |
+| `sitemap.ts` · `robots.ts` · `manifest.ts` | | |
+| the data-fetch top of each `page.tsx` | | |
 
----
-
-## 🤝 Contributing
-
-Contributions are welcome!
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+> A page like `app/product/[id]/page.tsx` is **both**: the file fetches data + sets SEO on the server, then renders a client component (`ProductDetailPage`) that runs in the browser.
 
 ---
 
-## 📄 License
+## 📁 Project structure (file by file)
 
-This project is licensed under the MIT License.
+### Root — config & entry
+1. **`proxy.ts`** 🟥 — Auth middleware: refreshes the Supabase session; protects `/admin` (admin email only) and `/orders` (login required). *(Next 16's renamed "middleware".)*
+2. **`next.config.js`** — Allowed image hosts, image formats, security headers.
+3. **`tailwind.config.ts`** — Theme; maps `brand-*` / `bg-color` to CSS variables (dark-mode + alpha aware).
+4. **`postcss.config.js`** — PostCSS (Tailwind + autoprefixer).
+5. **`tsconfig.json`** — TypeScript options + the `@/*` import alias.
+6. **`package.json` / `package-lock.json`** — Dependencies & scripts.
+7. **`.env.local`** — Secrets (Supabase keys, admin email, AI keys). **Gitignored.**
+8. **`CLAUDE.md`** — Full schema + architecture reference.
+9. **`README.md`** — This file.
+10. **`next-env.d.ts`** — Auto-generated by Next (don't edit).
+
+### `app/` — routes, pages & API
+**Layout & global pages** 🟦
+1. **`layout.tsx`** — Root layout: mounts providers, Navbar/Footer/Chatbot, global SEO + JSON-LD.
+2. **`page.tsx`** — Home (server-fetches products → renders `HomePage`).
+3. **`globals.css`** — Global styles + the light/dark theme CSS variables.
+4. **`loading.tsx` / `error.tsx` / `not-found.tsx`** — Global loading, error boundary, 404.
+
+**SEO route files** 🟥
+5. **`sitemap.ts`** — `/sitemap.xml` (home, blog + articles, chef, every product).
+6. **`robots.ts`** — `/robots.txt`.
+7. **`manifest.ts`** — PWA web manifest.
+
+**Customer pages** 🟦
+8. **`product/[id]/page.tsx`** — Product detail (server: fetch product, per-product SEO via `generateMetadata`, `ProductSchema` + breadcrumbs, static params).
+9. **`product/[id]/loading.tsx`** — Product page skeleton.
+10. **`orders/page.tsx`** — Logged-in user's orders.
+11. **`wishlist/page.tsx`** — Wishlist.
+12. **`chef/page.tsx`** — AI recipe generator (calls `/api/recipe`).
+13. **`reset-password/page.tsx`** — Password reset.
+14. **`blog/page.tsx`** — Blog index (featured post + cover-image cards).
+15. **`blog/[slug]/page.tsx`** — Blog article (cover hero, TOC, inline diagrams, Article + Breadcrumb + FAQ schema, per-post SEO). Statically generated from `lib/blog.ts`.
+
+**Admin** 🟦 (gated by `proxy.ts` + a client check)
+16. **`admin/page.tsx`** — Dashboard shell: tabs, data fetch, status updates, CSV export.
+17. **`admin/components/AdminOverview.tsx`** — KPIs, status breakdown, 6-month revenue chart, top-products & low-stock widgets.
+18. **`admin/components/AdminOrders.tsx`** — Orders table, filters, detail modal, signed-URL payment proofs.
+19. **`admin/components/AdminProducts.tsx`** — Create/edit products + image upload (client compression).
+20. **`admin/components/AdminCoupons.tsx`** — Create/delete coupons, max-discount cap, active toggle.
+21. **`admin/components/AdminCustomers.tsx`** — Customer list (names/contact) derived from orders.
+
+**API endpoints** 🟥
+22. **`api/orders/route.ts`** — `POST` place order: validates, then calls the `process_order` DB function (atomic, authoritative pricing).
+23. **`api/validate-coupon/route.ts`** — `POST` look up a coupon for the live "Apply" preview.
+24. **`api/products/route.ts`** — `GET` product list (used by the chatbot).
+25. **`api/chat/route.ts`** — `POST` AI chatbot proxy (Groq; key stays server-side).
+26. **`api/recipe/route.ts`** — `POST` AI recipe generator (Google Gemini).
+
+### `components/`
+**`providers/`** 🟦 (global contexts, mounted in `layout.tsx`)
+1. **`AuthProvider.tsx`** — Session, `user`, `isAdmin`, sign in/up/out, Google, reset.
+2. **`DataProvider.tsx`** — Loads all products into context.
+3. **`CartProvider.tsx`** — Cart (localStorage for guests, `carts` table when logged in) + realtime stock.
+4. **`WishlistProvider.tsx`** — Per-user wishlist.
+5. **`ThemeProvider.tsx`** — Light/dark theme (`next-themes`).
+
+**`pages/`** 🟦
+6. **`HomePage.tsx`** — Assembles the home sections.
+7. **`ProductDetailPage.tsx`** — Product detail UI + customer reviews.
+8. **`UserOrdersPage.tsx`** — Orders list UI.
+9. **`pages/home/*`** — Home sections: `HeroSection`, `FeaturesSection`, `ShopSection`, `DeliveryAreas`, `B2BSection`, `ContactSection`, `FAQSection`.
+
+**`ui/`** 🟦
+10. **`Navbar.tsx`** — Top nav, theme toggle, theme-aware logo, cart/wishlist.
+11. **`Footer.tsx`** — Footer.
+12. **`Chatbot.tsx`** — AI assistant widget (Support + Chef tabs).
+13. **`CartSidebar.tsx`** — Slide-out cart.
+14. **`CheckoutModal.tsx`** — Checkout (COD/UPI, coupon, payment proof).
+15. **`AuthModal.tsx`** — Login / signup modal.
+16. **`SporeBackground.tsx`** — Animated particle canvas (hero background).
+17. **`MagneticButton.tsx`** — Cursor-reactive button.
+18. **`Skeleton.tsx`** — Loading placeholder.
+
+**`shared/`**
+19. **`SEO.tsx`** 🟥 — JSON-LD components: `OrganizationSchema`, `LocalBusinessSchema`, `FAQSchema`, `ProductSchema`, `BreadcrumbSchema`, `ArticleSchema`, `FAQJsonLd`.
+
+**`blog/`**
+20. **`Diagrams.tsx`** 🟦 — Reusable blog visuals: farm-to-door & platform workflows, aeroponic diagram, nutrition chart, storage do/don't, mushroom-type cards, how-to-order steps.
+
+### `lib/`
+1. **`config.ts`** ⬜ — Constants: `ADMIN_EMAIL`, `SITE_URL`, `CURRENCY`, Supabase env.
+2. **`utils.ts`** ⬜ — Small helpers (`cn`, etc.).
+3. **`blog.ts`** ⬜ — Blog content (article data + rich content blocks) consumed by the blog pages & sitemap.
+4. **`supabase/client.ts`** 🟦 — Browser Supabase client.
+5. **`supabase/server.ts`** 🟥 — Server Supabase client (cookie-aware).
+
+### `types/`
+1. **`index.ts`** ⬜ — Shared TypeScript types (`Product`, `Order`, `CartItem`, `Coupon`, …).
+
+### `supabase/`
+1. **`functions/send-order-email/index.ts`** 🟥 — Edge function: emails order confirmations (Gmail SMTP), fired by a DB trigger on new orders.
+
+### `scripts/` & `public/`
+- **`scripts/gen-assets.mjs`** — generates PWA icons + the OG image from the logo (`node scripts/gen-assets.mjs`).
+- **`scripts/gen-blog-covers.mjs`** — generates the per-post blog cover images (`node scripts/gen-blog-covers.mjs`).
+- **`public/`** — static assets: `logo.svg`, `dark-themelogo.svg`, `hero-animation.gif`, PWA icons (`icon-*.png`), `og-image.png`, **`llms.txt`** (for AI crawlers), and `blog/*.png` cover images.
+
+### Not in version control
+- **`node_modules/`** — Installed dependencies (regenerated by `npm install`).
+- **`.next/`** — Build cache (auto-generated; safe to delete).
 
 ---
 
-## 📞 Contact
+## 🔎 SEO — which files, and do you need many?
 
-**Vinay Aggarwal**
+**Yes — multiple files is correct.** These are Next.js *file conventions*; they can't be merged into one:
 
-* 📧 Email: [vinayaggarwal271@gmail.com](mailto:vinayaggarwal271@gmail.com)
-* 📱 Phone: +91-8826986127
-* 🌐 Website: [supr-mushroom.vercel.app](https://supr-mushroom.vercel.app)
+| File | Produces |
+|---|---|
+| `app/layout.tsx` | Global title, description, keywords, OpenGraph/Twitter, canonical, geo tags |
+| `app/product/[id]/page.tsx` | **Per-product** title/description/canonical (`generateMetadata`) |
+| `components/shared/SEO.tsx` | JSON-LD structured data (Organization, LocalBusiness, FAQ, Product, Breadcrumb, Article) |
+| `app/blog/[slug]/page.tsx` | Per-article SEO + Article/Breadcrumb/FAQ structured data |
+| `app/sitemap.ts` | `/sitemap.xml` (home, products, blog + articles) |
+| `app/robots.ts` | `/robots.txt` |
+| `app/manifest.ts` | PWA manifest (PNG icons) |
+| `public/llms.txt` | **AI-SEO** — a guide for AI crawlers (ChatGPT/Perplexity-style) |
+| `next.config.js` | Security headers + image optimization |
+
+**Optimizations applied:** the domain reads from one `SITE_URL` constant (`lib/config.ts`) instead of being hardcoded; the **duplicate static `public/robots.txt`** (which shadowed `app/robots.ts`) was removed; every page/product/article has **its own OG share image**; products & blog pages emit **Article/Breadcrumb/FAQ JSON-LD**; and `llms.txt` was added for AI search.
+
+---
+
+## 🧹 Cleanup status & remaining notes
+
+**Removed:** the Android/Capacitor wrapper, dead `LazyImage.tsx`, the duplicate `public/robots.txt`, an unused middleware helper, two stale SQL setup scripts, and 3 duplicate order-email triggers.
+
+**Known minor redundancy (intentional, safe):** the coupon **discount formula** lives in 3 layers — `CheckoutModal` (live preview), `api/validate-coupon` (server lookup) and the `process_order` DB function (the *authoritative* one). Defense-in-depth; only the DB value is trusted.
+
+**Supabase data — cleaned up:**
+- ✅ Fixed a product name typo ("Oyester" → "Oyster") and mismatched leftover slugs (e.g. King Oyster's slug was `saffron-grade-a`).
+- ✅ Set the missing category on 2 products.
+- ✅ Reset the seeded/fake review counts to honest values (0); `ProductSchema` now only emits an `AggregateRating` when **real** reviews exist (avoids Google's review-spam risk).
+- ✅ Corrected the ₹1000 test price on "White Button Mushroom" to ₹79 — **set your real price in Admin → Products.**
+- ℹ️ Product-level `discount_percentage` (e.g. Cremini 10%) isn't applied on the storefront yet — only coupon discounts. A possible future feature.
+
+**Manual steps (need you):**
+1. **AI chatbot fails** — the `GROQ_API_KEY` in `.env.local` is **invalid (401)**. Get a free key at [console.groq.com](https://console.groq.com), replace it, and restart `npm run dev`.
+2. Enable **Leaked-Password Protection** in Supabase → Authentication.
+3. Redeploy the `send-order-email` edge function for the latest email formatting.
+4. Re-run the asset scripts if you change the logo or add blog posts (`node scripts/gen-assets.mjs`, `node scripts/gen-blog-covers.mjs`).
+
+> **Note on the dev "hydration" console error:** attributes like `bis_skin_checked` / `fdprocessedid` are injected by **browser extensions** (Bitdefender, form-fillers) and only appear in dev — never in production or for real users. Test in an Incognito window to confirm.

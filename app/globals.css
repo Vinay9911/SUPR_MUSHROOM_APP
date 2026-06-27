@@ -3,9 +3,43 @@
 @tailwind utilities;
 
 :root {
+  --font-inter: 'Inter', sans-serif;
+  --font-playfair: 'Playfair Display', serif;
+
+  /* Light theme — stored as "R G B" channels so Tailwind alpha modifiers
+     (e.g. bg-brand-cream/50, dark:bg-bg-color/70) work. */
+  --brand-brown: 188 108 37;
+  --brand-dark: 139 69 19;
+  --brand-cream: 250 237 205;
+  --brand-light: 254 250 224;
+  --brand-darkCream: 233 220 196;
+  --brand-green: 24 185 24;
+  --brand-text: 45 45 45;
+  --brand-muted: 102 102 102;
+  --bg-color: 255 255 255;
+}
+
+.dark {
+  /* True near-black "particle field" dark theme — its own identity, NOT the
+     warm light palette re-tinted. Crisp white text, glowing amber accent.
+     Values are "R G B" channels (see :root note above). */
+  --brand-brown: 240 164 92;   /* glowing warm amber accent */
+  --brand-dark: 201 126 51;    /* deeper amber for hovers */
+  --brand-cream: 32 36 44;     /* hairline borders / faint surfaces */
+  --brand-light: 15 18 25;     /* cards, inputs, secondary surfaces */
+  --brand-darkCream: 20 24 33; /* slightly elevated cards */
+  --brand-green: 52 211 153;   /* crisp emerald */
+  --brand-text: 247 248 250;   /* crisp near-white text */
+  --brand-muted: 139 147 161;  /* cool muted grey */
+  --bg-color: 7 8 11;          /* near-black background */
+}
+
+body {
   font-family: var(--font-inter), system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  background-color: rgb(var(--bg-color));
+  color: rgb(var(--brand-text));
 }
 
 html {
@@ -21,6 +55,7 @@ body {
   overflow-x: hidden;
   width: 100%;
   position: relative;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .font-serif {
