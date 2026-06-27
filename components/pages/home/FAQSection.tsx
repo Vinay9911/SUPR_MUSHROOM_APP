@@ -2,7 +2,7 @@ import React from 'react';
 
 export const FAQSection = () => {
   return (
-    <section className="py-16 bg-brand-cream/30">
+    <section className="py-16 bg-brand-cream/30 dark:bg-black">
       <div className="max-w-4xl mx-auto px-4">
         <h2 className="text-3xl font-serif font-bold text-center mb-12">Frequently Asked Questions About Mushrooms in Delhi NCR</h2>
         <div className="space-y-4">

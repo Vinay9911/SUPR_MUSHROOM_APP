@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
                 alt="Supr Mushrooms"
                 width={160}
                 height={80}
-                className="h-10 md:h-20 w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
+                className="h-12 md:h-[5.5rem] w-auto object-contain transition-transform group-hover:scale-105 hidden dark:block"
                 priority
               />
             </button>
@@ -177,8 +177,10 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Drawer — above the chatbot (z-100) so they never overlap */}
+      {/* Mobile Drawer — rendered OUTSIDE <nav> so the navbar's backdrop-blur
+          doesn't trap this fixed element to the navbar's height. */}
         <div
           className={`fixed inset-0 z-[105] bg-black/50 transition-opacity duration-300 md:hidden ${
             isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -258,7 +260,6 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
         </div>
-      </nav>
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
       <CartSidebar 
