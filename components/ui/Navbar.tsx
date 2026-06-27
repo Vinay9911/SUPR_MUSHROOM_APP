@@ -154,6 +154,14 @@ export const Navbar: React.FC = () => {
                 </button>
               )}
 
+              <Link
+                href="/blog"
+                aria-label="Blog"
+                className="p-2.5 rounded-full bg-brand-light dark:bg-brand-darkCream text-brand-brown hover:bg-brand-cream transition-colors"
+              >
+                <BookOpen size={20} />
+              </Link>
+
               <button
                 onClick={handleCartClick}
                 aria-label="Cart"
