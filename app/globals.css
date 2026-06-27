@@ -72,3 +72,56 @@ body {
     scrollbar-width: none;
   }
 }
+
+/* ---------------------------------------------------------------
+   Animated glowing card border.
+   Subtle gradient edge at rest; on hover it brightens, rotates and
+   casts a soft outer glow. Add the class "glow-card" to any rounded
+   box (it must keep its own border-radius). Reduced-motion safe.
+----------------------------------------------------------------*/
+@property --glow-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes glow-card-spin {
+  to { --glow-angle: 360deg; }
+}
+.glow-card {
+  position: relative;
+  transition: box-shadow 0.4s ease, transform 0.3s ease;
+}
+.glow-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--glow-angle),
+    rgb(var(--brand-brown)) 0deg,
+    transparent 90deg,
+    transparent 210deg,
+    rgb(var(--brand-green)) 300deg,
+    rgb(var(--brand-brown)) 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  opacity: 0.35;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.glow-card:hover::before {
+  opacity: 1;
+  animation: glow-card-spin 4s linear infinite;
+}
+.glow-card:hover {
+  box-shadow: 0 0 26px -6px rgb(var(--brand-brown) / 0.5);
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .glow-card:hover::before { animation: none; }
+  .glow-card:hover { transform: none; }
+}

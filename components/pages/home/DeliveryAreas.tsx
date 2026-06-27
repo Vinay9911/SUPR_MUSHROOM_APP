@@ -15,7 +15,7 @@ export const DeliveryAreas = () => {
             { city: 'Ghaziabad', desc: 'Organic mushrooms delivered fresh in Ghaziabad' },
             { city: 'Faridabad', desc: 'Farm-fresh mushroom delivery in Faridabad' }
           ].map((area, idx) => (
-            <div key={idx} className="text-center p-6 bg-brand-light rounded-2xl border border-brand-cream hover:shadow-lg transition-all">
+            <div key={idx} className="glow-card text-center p-6 bg-brand-light rounded-2xl border border-brand-cream">
               <h3 className="font-bold text-xl text-brand-brown mb-2">{area.city}</h3>
               <p className="text-sm text-brand-muted">{area.desc}</p>
             </div>

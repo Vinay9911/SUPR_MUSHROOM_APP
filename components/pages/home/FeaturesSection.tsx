@@ -38,7 +38,7 @@ export const FeaturesSection = () => {
             { icon: Leaf, title: "100% Natural Aeroponic", desc: "Grown using aeroponic vertical farming - no soil contamination, no heavy metals, completely organic and natural." },
             { icon: DollarSign, title: "Best Price for Bulk Orders", desc: "Competitive wholesale pricing for restaurants, hotels and bulk buyers across Delhi NCR region." }
           ].map((feature, idx) => (
-            <motion.div key={idx} variants={fadeInUp} className="p-6 md:p-8 bg-brand-light rounded-3xl border border-brand-cream hover:bg-brand-cream hover:shadow-xl dark:hover:border-brand-brown/40 dark:hover:shadow-brand-brown/10 hover:-translate-y-1 transition-all duration-300 group cursor-default">
+            <motion.div key={idx} variants={fadeInUp} className="glow-card p-6 md:p-8 bg-brand-light rounded-3xl border border-brand-cream transition-all duration-300 group cursor-default">
               <div className="w-12 h-12 md:w-14 md:h-14 bg-brand-brown rounded-2xl flex items-center justify-center text-white mb-4 md:mb-6 group-hover:scale-110 transition-transform"><feature.icon size={24} className="md:w-[28px] md:h-[28px]" /></div>
               <h4 className="text-lg md:text-xl font-bold mb-2 md:mb-4 text-brand-text">{feature.title}</h4>
               <p className="text-brand-muted text-xs md:text-sm leading-relaxed">{feature.desc}</p>

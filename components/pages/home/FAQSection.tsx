@@ -40,7 +40,7 @@ export const FAQSection = () => {
               a: "Yes! We specialize in wholesale mushroom supply for restaurants, hotels, and bulk buyers. We offer special pricing for regular orders and can supply up to 50kg+ daily. Contact us for customized wholesale rates."
             }
           ].map((faq, i) => (
-            <details key={i} className="bg-white dark:bg-brand-darkCream p-6 rounded-xl border border-brand-cream dark:border-brand-cream/20 cursor-pointer group">
+            <details key={i} className="glow-card bg-white dark:bg-brand-darkCream p-6 rounded-xl border border-brand-cream dark:border-brand-cream/20 cursor-pointer group">
               <summary className="font-bold text-lg flex justify-between items-center list-none">
                 {faq.q}
                 <span className="group-open:rotate-180 transition-transform">▼</span>
