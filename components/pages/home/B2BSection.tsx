@@ -1,5 +1,6 @@
 import React from 'react';
 import { Phone } from 'lucide-react';
+import { GlowingBorder } from '@/components/ui/GlowingBorder';
 
 export const B2BSection = () => {
   return (
@@ -26,10 +27,12 @@ export const B2BSection = () => {
             </div>
           </div>
           
-          <div className="text-center">
-            <a href="tel:+918826986127" className="inline-flex items-center gap-2 bg-brand-brown text-white px-8 py-4 rounded-full font-bold hover:bg-brand-dark transition-all shadow-lg">
-              <Phone size={20} /> Call for Bulk Orders: +91-8826986127
-            </a>
+          <div className="flex justify-center">
+            <GlowingBorder radius="rounded-full">
+              <a href="tel:+918826986127" className="inline-flex items-center gap-2 bg-brand-brown text-white px-8 py-4 rounded-full font-bold hover:bg-brand-dark transition-all shadow-lg">
+                <Phone size={20} /> Call for Bulk Orders: +91-8826986127
+              </a>
+            </GlowingBorder>
           </div>
         </div>
       </div>

@@ -187,7 +187,7 @@ export const Navbar: React.FC = () => {
         />
 
         <div
-          className={`fixed top-0 right-0 z-[110] h-full w-[85%] max-w-[320px] bg-white/95 dark:bg-bg-color/95 backdrop-blur-xl shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden ${
+          className={`fixed top-0 right-0 z-[110] h-full w-[85%] max-w-[320px] bg-white dark:bg-bg-color border-l border-brand-cream dark:border-brand-cream/20 shadow-2xl transform transition-transform duration-300 ease-in-out md:hidden ${
             isMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

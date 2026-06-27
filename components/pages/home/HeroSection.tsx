@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { SporeBackground } from '@/components/ui/SporeBackground';
+import { GlowingBorder } from '@/components/ui/GlowingBorder';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
@@ -60,9 +61,11 @@ export const HeroSection = () => {
           </motion.p>
           
           <motion.div variants={fadeInUp} className="flex flex-wrap justify-center md:justify-start gap-4">
-            <MagneticButton onClick={() => document.getElementById('shop')?.scrollIntoView({behavior: 'smooth'})} className="bg-brand-brown text-white px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-brand-dark hover:shadow-lg hover:shadow-brand-brown/30 transition-all flex items-center gap-2 group">
-              Order Fresh Mushrooms <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-            </MagneticButton>
+            <GlowingBorder radius="rounded-full">
+              <MagneticButton onClick={() => document.getElementById('shop')?.scrollIntoView({behavior: 'smooth'})} className="bg-brand-brown text-white px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-brand-dark hover:shadow-lg hover:shadow-brand-brown/30 transition-all flex items-center gap-2 group">
+                Order Fresh Mushrooms <ArrowRight className="group-hover:translate-x-1 transition-transform" />
+              </MagneticButton>
+            </GlowingBorder>
           </motion.div>
           
           <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-4 md:gap-8 pt-8 border-t border-brand-brown/10">
